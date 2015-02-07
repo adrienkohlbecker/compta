@@ -96,7 +96,7 @@ class Amount < BigDecimal
   alias_method :original_to_s, :to_s
 
   def to_s(arg = nil)
-    "#{round(2).to_s(arg)} #{currency}"
+    "#{round(5).to_s(arg)} #{currency}"
   end
 
 end

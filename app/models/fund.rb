@@ -35,7 +35,13 @@ class Fund < ActiveRecord::Base
 
   end
 
+  def cotation_at(date)
+    cotations.order("date DESC").where("date <= ?", date).first.value
+  end
+
   def append_or_refresh_cotation(date, value)
-    cotations.where(date: date).first_or_create.update_attributes(value: value)
+    c = cotations.where(date: date).first_or_create
+    c.value = Amount.new(value, currency, date)
+    c.save!
   end
 end
