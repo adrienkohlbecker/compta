@@ -11,10 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150207190237) do
+ActiveRecord::Schema.define(version: 20150207192516) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "currencies", force: :cascade do |t|
+    t.string   "name"
+    t.string   "boursorama_id"
+    t.string   "url"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  create_table "currency_cotations", force: :cascade do |t|
+    t.integer  "currency_id"
+    t.date     "date"
+    t.decimal  "value",       precision: 10, scale: 5
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
 
   create_table "fund_cotations", force: :cascade do |t|
     t.integer  "fund_id"
@@ -50,6 +66,7 @@ ActiveRecord::Schema.define(version: 20150207190237) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "currency_cotations", "currencies"
   add_foreign_key "fund_cotations", "funds"
   add_foreign_key "portfolio_transactions", "funds"
   add_foreign_key "portfolio_transactions", "portfolios"
