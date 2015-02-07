@@ -81,5 +81,5 @@ test:
 production:
   <<: *default
   database: compta-backend_production
-  username: compta-backend
-  password: <%= ENV['COMPTA-BACKEND_DATABASE_PASSWORD'] %>
+  username: root
+  password:
