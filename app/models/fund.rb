@@ -19,8 +19,13 @@ class Fund < ActiveRecord::Base
 
   def refresh_cotation_history
 
-    data = Boursorama::Fund.new(url).export
-    history = Boursorama::FundCotationHistory.new(data[:cotation_history_url]).cotation_history
+    history = Boursorama::CotationHistory.new(self.boursorama_id, :weekly).cotation_history
+
+    history.each do |date, value|
+      append_or_refresh_cotation(date, value)
+    end
+
+    history = Boursorama::CotationHistory.new(self.boursorama_id, :daily).cotation_history
 
     history.each do |date, value|
       append_or_refresh_cotation(date, value)
