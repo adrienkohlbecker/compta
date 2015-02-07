@@ -56,6 +56,9 @@ class Boursorama::Fund
     end
     date
   end
+
+  def currency
+    doc.css('.cotation').first.content.split(' ').last
   end
 
   def cotation_history_url
