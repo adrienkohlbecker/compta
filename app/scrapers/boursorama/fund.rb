@@ -5,7 +5,7 @@ class Boursorama::Fund
 
   def initialize(uri)
     @uri = uri
-    @http = HTTPCache.new(uri, key: :boursorama, expires_in: 3600 * 7)
+    @http = HTTPCache.new(uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
   def cached?
