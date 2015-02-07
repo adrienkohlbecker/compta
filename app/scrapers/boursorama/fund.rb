@@ -48,9 +48,8 @@ class Boursorama::Fund
     date = nil
     doc.css('#fiche_cours_details tr').each do |tr|
 
-      if tr.css('td')[0].content.strip.gsub(/\302\240/, "") == 'Date'
-        binding.pry
-        date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ""))
+      if tr.css('td')[0].content.strip.gsub(/\302\240/, '') == 'Date'
+        date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ''))
       end
 
     end
@@ -59,10 +58,6 @@ class Boursorama::Fund
 
   def currency
     doc.css('.cotation').first.content.split(' ').last
-  end
-
-  def cotation_history_url
-    'http://www.boursorama.com' + doc.content.match(/"(\/graphiques\/quotes.phtml.*)"/)[1]
   end
 
   def doc

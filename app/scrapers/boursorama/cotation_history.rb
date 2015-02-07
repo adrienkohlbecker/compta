@@ -38,13 +38,13 @@ class Boursorama::CotationHistory
   end
 
   def cotation_history_url
-    'http://www.boursorama.com' + doc.content.match(/"(\/graphiques\/quotes.phtml.*)"/)[1]
+    'http://www.boursorama.com' + doc.content.match(%r{"(/graphiques/quotes.phtml.*)"})[1]
   end
 
   def cotation_history
-    json["dataSets"].first["dataProvider"].each_with_object({}) do |item, h|
-      date = Date.parse(item["d"].split(" ").first)
-      h[date] = item["c"]
+    json['dataSets'].first['dataProvider'].each_with_object({}) do |item, h|
+      date = Date.parse(item['d'].split(' ').first)
+      h[date] = item['c']
     end
   end
 
