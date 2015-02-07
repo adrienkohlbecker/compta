@@ -42,6 +42,15 @@ gem 'httparty'
 gem 'redis'
 gem 'hiredis'
 
+# Uber console
+gem 'pry'
+gem 'pry-rails'
+gem 'pry-rescue'
+gem 'pry-stack_explorer'
+gem 'pry-byebug'
+
+gem 'awesome_print'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
