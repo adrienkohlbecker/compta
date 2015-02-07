@@ -2,9 +2,11 @@ class CurrenciesController < ApplicationController
 
   def create
 
-    currency = Currency.new(url: create_params[:url])
-    currency.refresh_data
-    currency.refresh_cotation_history
+    ActiveRecord::Base.transaction do
+      currency = Currency.new(url: create_params[:url])
+      currency.refresh_data
+      currency.refresh_cotation_history
+    end
 
     render nothing: true
 
