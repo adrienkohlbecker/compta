@@ -17,7 +17,7 @@ class Boursorama::Fund
   end
 
   def export
-    methods = Boursorama::Fund.instance_methods(false)
+    methods = self.class.instance_methods(false)
     methods -= [:version, :export, :doc, :cached?]
 
     data = {}
