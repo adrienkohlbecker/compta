@@ -32,6 +32,10 @@ class Currency < ActiveRecord::Base
 
   end
 
+  def cotation_at(date)
+    cotations.order("date DESC").where("date <= ?", date).first.value.in_currency(name, date)
+  end
+
   def append_or_refresh_cotation(date, value)
     cotations.where(date: date).first_or_create.update_attributes(value: value)
   end
