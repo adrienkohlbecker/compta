@@ -11,10 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150207160717) do
+ActiveRecord::Schema.define(version: 20150207173634) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "fund_cotations", force: :cascade do |t|
+    t.integer  "fund_id"
+    t.decimal  "value",      precision: 10, scale: 2
+    t.date     "date"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
 
   create_table "funds", force: :cascade do |t|
     t.string   "isin"
@@ -25,4 +33,5 @@ ActiveRecord::Schema.define(version: 20150207160717) do
     t.string   "url"
   end
 
+  add_foreign_key "fund_cotations", "funds"
 end
