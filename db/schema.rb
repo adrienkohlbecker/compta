@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150207192516) do
+ActiveRecord::Schema.define(version: 20150207204046) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,14 +27,14 @@ ActiveRecord::Schema.define(version: 20150207192516) do
   create_table "currency_cotations", force: :cascade do |t|
     t.integer  "currency_id"
     t.date     "date"
-    t.decimal  "value",       precision: 10, scale: 5
+    t.decimal  "value",       precision: 15, scale: 5
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
   end
 
   create_table "fund_cotations", force: :cascade do |t|
     t.integer  "fund_id"
-    t.decimal  "value",      precision: 10, scale: 2
+    t.decimal  "value",      precision: 15, scale: 5
     t.date     "date"
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
@@ -52,10 +52,10 @@ ActiveRecord::Schema.define(version: 20150207192516) do
 
   create_table "portfolio_transactions", force: :cascade do |t|
     t.integer  "fund_id"
-    t.decimal  "shares",       precision: 10, scale: 5
+    t.decimal  "shares",       precision: 15, scale: 5
     t.integer  "portfolio_id"
     t.date     "done_at"
-    t.decimal  "amount",       precision: 10, scale: 5
+    t.decimal  "amount",       precision: 15, scale: 5
     t.datetime "created_at",                            null: false
     t.datetime "updated_at",                            null: false
   end
