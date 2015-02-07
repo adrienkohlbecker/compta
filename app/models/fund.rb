@@ -1,4 +1,6 @@
 class Fund < ActiveRecord::Base
+
+  has_many :cotations, class_name: 'FundCotation'
   has_many :transactions, class_name: 'PortfolioTransaction'
 
   def refresh_data
