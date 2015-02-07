@@ -33,5 +33,23 @@ ActiveRecord::Schema.define(version: 20150207173634) do
     t.string   "url"
   end
 
+  create_table "portfolio_transactions", force: :cascade do |t|
+    t.integer  "fund_id"
+    t.decimal  "shares",       precision: 10, scale: 5
+    t.integer  "portfolio_id"
+    t.date     "done_at"
+    t.decimal  "amount",       precision: 10, scale: 5
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+  end
+
+  create_table "portfolios", force: :cascade do |t|
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "fund_cotations", "funds"
+  add_foreign_key "portfolio_transactions", "funds"
+  add_foreign_key "portfolio_transactions", "portfolios"
 end
