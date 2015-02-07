@@ -45,7 +45,17 @@ class Boursorama::Fund
   end
 
   def cotation_date
-    Date.parse(doc.css('#fiche_cours_details tr')[1].css('td')[2].content.strip)
+    date = nil
+    doc.css('#fiche_cours_details tr').each do |tr|
+
+      if tr.css('td')[0].content.strip.gsub(/\302\240/, "") == 'Date'
+        binding.pry
+        date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ""))
+      end
+
+    end
+    date
+  end
   end
 
   def cotation_history_url
