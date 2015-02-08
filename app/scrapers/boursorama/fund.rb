@@ -40,11 +40,11 @@ class Boursorama::Fund
     doc.css('.fv-isin').first.content.split('-').first.strip
   end
 
-  def cotation
-    doc.css('.cotation').first.content.split(' ').first.to_f
+  def quotation
+    doc.css('.quotation').first.content.split(' ').first.to_f
   end
 
-  def cotation_date
+  def quotation_date
     date = nil
     doc.css('#fiche_cours_details tr').each do |tr|
 
@@ -57,7 +57,7 @@ class Boursorama::Fund
   end
 
   def currency
-    doc.css('.cotation').first.content.split(' ').last
+    doc.css('.quotation').first.content.split(' ').last
   end
 
   def doc

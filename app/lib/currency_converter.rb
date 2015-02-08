@@ -12,7 +12,7 @@ class CurrencyConverter
     if symbol == "EUR"
       1
     else
-      Currency.where(name: symbol).first.cotation_at(at)
+      Currency.where(name: symbol).first.quotation_at(at)
     end
   end
 

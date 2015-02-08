@@ -1,6 +1,6 @@
-class CreateCurrencyCotations < ActiveRecord::Migration
+class CreateCurrencyQuotations < ActiveRecord::Migration
   def change
-    create_table :currency_cotations do |t|
+    create_table :currency_quotations do |t|
       t.integer :currency_id
       t.date :date
       t.decimal :value, precision: 15, scale: 5
@@ -8,6 +8,6 @@ class CreateCurrencyCotations < ActiveRecord::Migration
       t.timestamps null: false
     end
 
-    add_foreign_key :currency_cotations, :currencies
+    add_foreign_key :currency_quotations, :currencies
   end
 end

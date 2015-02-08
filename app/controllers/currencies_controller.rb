@@ -5,7 +5,7 @@ class CurrenciesController < ApplicationController
     ActiveRecord::Base.transaction do
       currency = Currency.new(url: create_params[:url])
       currency.refresh_data
-      currency.refresh_cotation_history
+      currency.refresh_quotation_history
     end
 
     render nothing: true

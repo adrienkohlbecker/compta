@@ -1,4 +1,4 @@
-class FundCotation < ActiveRecord::Base
+class FundQuotation < ActiveRecord::Base
   belongs_to :fund
 
   def value

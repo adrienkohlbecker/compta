@@ -1,6 +1,6 @@
 require 'json'
 
-class Boursorama::CotationHistory
+class Boursorama::QuotationHistory
   VERSION = 1
 
   def initialize(symbol, period = :daily)
@@ -37,11 +37,11 @@ class Boursorama::CotationHistory
     data
   end
 
-  def cotation_history_url
+  def quotation_history_url
     'http://www.boursorama.com' + doc.content.match(%r{"(/graphiques/quotes.phtml.*)"})[1]
   end
 
-  def cotation_history
+  def quotation_history
     json['dataSets'].first['dataProvider'].each_with_object({}) do |item, h|
       date = Date.parse(item['d'].split(' ').first)
       h[date] = item['c']
@@ -61,6 +61,6 @@ class Boursorama::CotationHistory
   end
 
   private def fetch_json
-    JSON.load(HTTPCache.new(cotation_history_url, key: :boursorama, expires_in: 3600 * 24).get)
+    JSON.load(HTTPCache.new(quotation_history_url, key: :boursorama, expires_in: 3600 * 24).get)
   end
 end

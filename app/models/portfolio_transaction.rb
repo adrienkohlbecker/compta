@@ -3,7 +3,7 @@ class PortfolioTransaction < ActiveRecord::Base
   belongs_to :portfolio
 
   def current_value
-    fund.cotation_at(Date.today) * shares
+    fund.quotation_at(Date.today) * shares
   end
 
   def amount

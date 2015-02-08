@@ -29,18 +29,18 @@ class Boursorama::Currency
   end
 
   def name
-    doc.css('.cotation').first.content.split(' ').last
+    doc.css('.quotation').first.content.split(' ').last
   end
 
   def boursorama_id
     @uri.split('?symbole=').last
   end
 
-  def cotation
-    doc.css('.cotation').first.content.split(' ').first.to_f
+  def quotation
+    doc.css('.quotation').first.content.split(' ').first.to_f
   end
 
-  def cotation_date
+  def quotation_date
     Date.today
   end
 

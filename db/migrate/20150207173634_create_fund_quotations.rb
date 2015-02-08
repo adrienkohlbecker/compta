@@ -1,6 +1,6 @@
-class CreateFundCotations < ActiveRecord::Migration
+class CreateFundQuotations < ActiveRecord::Migration
   def change
-    create_table :fund_cotations do |t|
+    create_table :fund_quotations do |t|
       t.integer :fund_id
       t.decimal :value, precision: 10, scale: 2
       t.date :date
@@ -8,6 +8,6 @@ class CreateFundCotations < ActiveRecord::Migration
       t.timestamps null: false
     end
 
-    add_foreign_key :fund_cotations, :funds
+    add_foreign_key :fund_quotations, :funds
   end
 end

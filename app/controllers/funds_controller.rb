@@ -5,7 +5,7 @@ class FundsController < ApplicationController
     ActiveRecord::Base.transaction do
       fund = Fund.new(url: create_params[:url])
       fund.refresh_data
-      fund.refresh_cotation_history
+      fund.refresh_quotation_history
     end
 
     render nothing: true
