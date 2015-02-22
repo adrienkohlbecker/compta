@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150207232435) do
+ActiveRecord::Schema.define(version: 20150222194703) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,24 +32,30 @@ ActiveRecord::Schema.define(version: 20150207232435) do
     t.datetime "updated_at",                           null: false
   end
 
-  create_table "fund_quotations", force: :cascade do |t|
-    t.integer  "fund_id"
+  create_table "euro_funds", force: :cascade do |t|
+    t.string   "name"
+    t.string   "currency"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "opcvm_funds", force: :cascade do |t|
+    t.string   "isin"
+    t.string   "name"
+    t.string   "boursorama_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.string   "currency"
+  end
+
+  create_table "opcvm_quotations", force: :cascade do |t|
+    t.integer  "opcvm_fund_id"
     t.decimal  "value_original", precision: 15, scale: 5
     t.date     "date"
     t.datetime "created_at",                              null: false
     t.datetime "updated_at",                              null: false
     t.string   "value_currency"
     t.date     "value_date"
-  end
-
-  create_table "funds", force: :cascade do |t|
-    t.string   "isin"
-    t.string   "name"
-    t.string   "boursorama_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.string   "url"
-    t.string   "currency"
   end
 
   create_table "portfolio_transactions", force: :cascade do |t|
@@ -62,6 +68,7 @@ ActiveRecord::Schema.define(version: 20150207232435) do
     t.datetime "updated_at",                               null: false
     t.string   "amount_currency"
     t.date     "amount_date"
+    t.string   "fund_type"
   end
 
   create_table "portfolios", force: :cascade do |t|
@@ -71,7 +78,6 @@ ActiveRecord::Schema.define(version: 20150207232435) do
   end
 
   add_foreign_key "currency_quotations", "currencies"
-  add_foreign_key "fund_quotations", "funds"
-  add_foreign_key "portfolio_transactions", "funds"
+  add_foreign_key "opcvm_quotations", "opcvm_funds"
   add_foreign_key "portfolio_transactions", "portfolios"
 end

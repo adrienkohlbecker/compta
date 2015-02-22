@@ -1,13 +1,12 @@
-class Fund < ActiveRecord::Base
+class OpcvmFund < ActiveRecord::Base
 
-  has_many :quotations, class_name: 'FundQuotation'
-  has_many :transactions, class_name: 'PortfolioTransaction'
+  has_many :quotations, class_name: 'OpcvmQuotation'
+  has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def refresh_data
 
-    data = Boursorama::Fund.new(url).export
+    data = Boursorama::Fund.new(self.boursorama_id).export
 
-    self.boursorama_id = data[:boursorama_id]
     self.isin = data[:isin]
     self.name = data[:name]
     self.currency = data[:currency]

@@ -1,5 +1,5 @@
 class PortfolioTransaction < ActiveRecord::Base
-  belongs_to :fund
+  belongs_to :fund, polymorphic: true
   belongs_to :portfolio
 
   def quotation_when_done

@@ -3,9 +3,9 @@ require 'nokogiri'
 class Boursorama::Fund
   VERSION = 1
 
-  def initialize(uri)
-    @uri = uri
-    @http = HTTPCache.new(uri, key: :boursorama, expires_in: 3600 * 24)
+  def initialize(boursorama_id)
+    @uri = "http://www.boursorama.com/bourse/opcvm/opcvm.phtml?symbole=#{boursorama_id}"
+    @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
   def cached?
@@ -30,10 +30,6 @@ class Boursorama::Fund
 
   def name
     doc.css('[itemprop="name"]').first.content.strip
-  end
-
-  def boursorama_id
-    @uri.split('?symbole=').last
   end
 
   def isin
