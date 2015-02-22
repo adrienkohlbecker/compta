@@ -44,7 +44,7 @@ class Boursorama::QuotationHistory
   def quotation_history
     json['dataSets'].first['dataProvider'].each_with_object({}) do |item, h|
       date = Date.parse(item['d'].split(' ').first)
-      h[date] = item['c']
+      h[date] = item['c'].to_s
     end
   end
 

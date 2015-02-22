@@ -30,6 +30,8 @@ class Portfolio < ActiveRecord::Base
   end
 
   def annualized_performance
+    acc = 0
+
     transactions.includes(:fund).each do |transaction|
 
       current_value = transaction.current_value.to_currency(currency).value

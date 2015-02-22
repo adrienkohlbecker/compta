@@ -41,7 +41,7 @@ class Boursorama::Fund
   end
 
   def quotation
-    doc.css('.quotation').first.content.split(' ').first.to_f
+    doc.css('.cotation').first.content.split(' ').first
   end
 
   def quotation_date
@@ -57,7 +57,7 @@ class Boursorama::Fund
   end
 
   def currency
-    doc.css('.quotation').first.content.split(' ').last
+    doc.css('.cotation').first.content.split(' ').last
   end
 
   def doc
