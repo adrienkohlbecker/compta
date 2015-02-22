@@ -2,6 +2,10 @@ class PortfolioTransaction < ActiveRecord::Base
   belongs_to :fund
   belongs_to :portfolio
 
+  def quotation_when_done
+    fund.quotation_at(done_at)
+  end
+
   def current_value
     fund.quotation_at(Date.today) * shares
   end
