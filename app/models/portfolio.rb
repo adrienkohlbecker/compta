@@ -65,4 +65,48 @@ class Portfolio < ActiveRecord::Base
     )
 
   end
+
+  def print_list
+
+    items = {}
+    OpcvmFund.all.each do |fund|
+
+      items[fund.name] = {
+        '#id': fund.id,
+        name: fund.name,
+        isin: fund.isin,
+        shares: 0,
+        invested: 0,
+        value: 0,
+        pv: 0,
+      }
+
+    end
+    EuroFund.all.each do |fund|
+
+      items[fund.name] = {
+        '#id': fund.id,
+        name: fund.name,
+        isin: "",
+        shares: 0,
+        invested: 0,
+        value: 0,
+        pv: 0,
+      }
+
+    end
+
+    transactions.includes(:fund).each do |transaction|
+
+      item = items[transaction.fund.name]
+      item[:shares] += transaction.shares
+      item[:invested] += transaction.amount.round(2)
+      item[:value] += transaction.current_value.round(2)
+      item[:pv] += item[:value] - item[:invested]
+
+    end
+
+    puts Hirb::Helpers::AutoTable.render(items.values)
+
+  end
 end
