@@ -1,20 +1,19 @@
 # == Schema Information
 #
-# Table name: fund_quotations
+# Table name: opcvm_quotations
 #
 #  id             :integer          not null, primary key
-#  fund_id        :integer
+#  opcvm_fund_id  :integer
 #  value_original :decimal(15, 5)
 #  date           :date
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
 #  value_currency :string
 #  value_date     :date
-#  fund_type      :string
 #
 
-class FundQuotation < ActiveRecord::Base
-  belongs_to :fund, polymorphic: true
+class OpcvmQuotation < ActiveRecord::Base
+  belongs_to :fund, class_name: 'OpcvmFund', foreign_key: :opcvm_fund_id
 
   def value
     @_value ||= Amount.new(value_original, value_currency, value_date)

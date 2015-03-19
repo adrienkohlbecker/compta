@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150222210141) do
+ActiveRecord::Schema.define(version: 20150319225928) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,17 +50,6 @@ ActiveRecord::Schema.define(version: 20150222210141) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "fund_quotations", force: :cascade do |t|
-    t.integer  "fund_id"
-    t.decimal  "value_original", precision: 15, scale: 5
-    t.date     "date"
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
-    t.string   "value_currency"
-    t.date     "value_date"
-    t.string   "fund_type"
-  end
-
   create_table "opcvm_funds", force: :cascade do |t|
     t.string   "isin"
     t.string   "name"
@@ -68,6 +57,16 @@ ActiveRecord::Schema.define(version: 20150222210141) do
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
     t.string   "currency"
+  end
+
+  create_table "opcvm_quotations", force: :cascade do |t|
+    t.integer  "opcvm_fund_id"
+    t.decimal  "value_original", precision: 15, scale: 5
+    t.date     "date"
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
+    t.string   "value_currency"
+    t.date     "value_date"
   end
 
   create_table "portfolio_transactions", force: :cascade do |t|
@@ -92,5 +91,6 @@ ActiveRecord::Schema.define(version: 20150222210141) do
   add_foreign_key "currency_quotations", "currencies"
   add_foreign_key "euro_fund_investments", "euro_funds"
   add_foreign_key "euro_fund_investments", "portfolios"
+  add_foreign_key "opcvm_quotations", "opcvm_funds"
   add_foreign_key "portfolio_transactions", "portfolios"
 end
