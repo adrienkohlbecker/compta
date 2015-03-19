@@ -1,3 +1,18 @@
+# == Schema Information
+#
+# Table name: euro_fund_investments
+#
+#  id              :integer          not null, primary key
+#  euro_fund_id    :integer
+#  amount_original :decimal(15, 5)
+#  amount_currency :string
+#  amount_date     :date
+#  value_at        :date
+#  portfolio_id    :integer
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#
+
 class EuroFundInvestment < ActiveRecord::Base
 
   belongs_to :euro_fund

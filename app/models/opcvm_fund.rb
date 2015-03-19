@@ -1,3 +1,16 @@
+# == Schema Information
+#
+# Table name: opcvm_funds
+#
+#  id            :integer          not null, primary key
+#  isin          :string
+#  name          :string
+#  boursorama_id :string
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  currency      :string
+#
+
 class OpcvmFund < ActiveRecord::Base
 
   has_many :quotations, class_name: 'FundQuotation', as: :fund

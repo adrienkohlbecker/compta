@@ -1,3 +1,20 @@
+# == Schema Information
+#
+# Table name: portfolio_transactions
+#
+#  id              :integer          not null, primary key
+#  fund_id         :integer
+#  shares          :decimal(15, 5)
+#  portfolio_id    :integer
+#  done_at         :date
+#  amount_original :decimal(15, 5)
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  amount_currency :string
+#  amount_date     :date
+#  fund_type       :string
+#
+
 class PortfolioTransaction < ActiveRecord::Base
   belongs_to :fund, polymorphic: true
   belongs_to :portfolio
