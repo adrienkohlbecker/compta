@@ -1,5 +1,5 @@
-class OpcvmQuotation < ActiveRecord::Base
-  belongs_to :opcvm_fund
+class FundQuotation < ActiveRecord::Base
+  belongs_to :fund, polymorphic: true
 
   def value
     @_value ||= Amount.new(value_original, value_currency, value_date)

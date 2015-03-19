@@ -1,5 +1,6 @@
 class Portfolio < ActiveRecord::Base
   has_many :transactions, class_name: 'PortfolioTransaction'
+  has_many :euro_fund_investments
 
   def currency
     "EUR"
