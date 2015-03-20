@@ -63,7 +63,7 @@ class Portfolio < ActiveRecord::Base
       invested = PortfolioTransaction.where(fund: fund, category: 'Virement').map(&:amount).reduce(:+)
       actual_pv = PortfolioTransaction.where(fund: fund).where.not(category: 'Virement').map(&:amount).reduce(:+)
 
-      rate = 0.01
+      rate = fund.current_interest_rate
 
       value_at_beginning_of_year = PortfolioTransaction.where(fund: fund).where('done_at < ?', Date.today.beginning_of_year).map(&:amount).reduce(:+)
       latent_pv = value_at_beginning_of_year * ((1 + rate) ** ((Date.today - Date.today.beginning_of_year - 1) / 365.0) - 1)
