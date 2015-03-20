@@ -11,4 +11,5 @@
 
 class EuroFund < ActiveRecord::Base
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
+  has_many :interest_rates, as: :object
 end

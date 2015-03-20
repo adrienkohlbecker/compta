@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150320010344) do
+ActiveRecord::Schema.define(version: 20150320010832) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -37,6 +37,16 @@ ActiveRecord::Schema.define(version: 20150320010344) do
     t.string   "currency"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "interest_rates", force: :cascade do |t|
+    t.integer  "object_id"
+    t.string   "object_type"
+    t.decimal  "rate",        precision: 15, scale: 5
+    t.date     "from"
+    t.date     "to"
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
   end
 
   create_table "opcvm_funds", force: :cascade do |t|
