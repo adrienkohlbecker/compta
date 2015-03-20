@@ -69,7 +69,7 @@ class Portfolio < ActiveRecord::Base
 
     transactions.create(
       fund: EuroFund.find(fund_id),
-      shares: 1,
+      shares: nil,
       amount: Amount.new(amount, currency, date),
       done_at: date
     )
