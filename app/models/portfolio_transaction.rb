@@ -13,6 +13,7 @@
 #  amount_currency :string
 #  amount_date     :date
 #  fund_type       :string
+#  category        :string
 #
 
 class PortfolioTransaction < ActiveRecord::Base
