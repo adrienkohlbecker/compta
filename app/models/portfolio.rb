@@ -16,44 +16,6 @@ class Portfolio < ActiveRecord::Base
     "EUR"
   end
 
-  def invested_amount
-    acc = 0
-
-    transactions.map(&:amount).each do |amount|
-      acc += amount.to_currency(currency).value
-    end
-
-    Amount.new(acc, currency, Date.today)
-  end
-
-  def current_amount
-    acc = 0
-
-    transactions.includes(:fund).map(&:current_value).each do |amount|
-      acc += amount.to_currency(currency).value
-    end
-
-    Amount.new(acc, currency, Date.today)
-  end
-
-  def performance
-    (current_amount / invested_amount).to_f - 1
-  end
-
-  def annualized_performance
-    acc = 0
-
-    transactions.includes(:fund).each do |transaction|
-
-      current_value = transaction.current_value.to_currency(currency).value
-      invested_value = transaction.amount.to_currency(currency).value
-
-      acc += (current_value - invested_value) / (Date.today - transaction.done_at)
-    end
-
-    365 * (acc / invested_amount.value).to_f
-  end
-
   def append_opcvm_transaction(fund_id:, shares:, amount:, date:)
 
     transactions.create(
@@ -81,42 +43,61 @@ class Portfolio < ActiveRecord::Base
     items = {}
     OpcvmFund.all.each do |fund|
 
+      shares = PortfolioTransaction.where(fund: fund).pluck(:shares).reduce(:+)
+      invested = PortfolioTransaction.where(fund: fund).map(&:amount).reduce(:+).to_eur
+      current_value = (fund.quotation_at(Date.today) * shares).to_eur
+
       items[fund.name] = {
         '#id': fund.id,
         name: fund.name,
         isin: fund.isin,
-        shares: 0,
-        invested: 0,
-        value: 0,
-        pv: 0,
+        shares: shares,
+        invested: invested,
+        value: current_value,
+        pv: current_value - invested
       }
 
     end
     EuroFund.all.each do |fund|
 
+      invested = PortfolioTransaction.where(fund: fund, category: 'Virement').map(&:amount).reduce(:+)
+      actual_pv = PortfolioTransaction.where(fund: fund).where.not(category: 'Virement').map(&:amount).reduce(:+)
+
+      rate = 0.01
+
+      value_at_beginning_of_year = PortfolioTransaction.where(fund: fund).where('done_at < ?', Date.today.beginning_of_year).map(&:amount).reduce(:+)
+      latent_pv = value_at_beginning_of_year * ((1 + rate) ** ((Date.today - Date.today.beginning_of_year - 1) / 365.0) - 1)
+
+      PortfolioTransaction.where(fund: fund).where('done_at >= ?', Date.today.beginning_of_year).order('done_at ASC').each do |t|
+        latent_pv += t.amount * ((1 + rate) ** ((Date.today - t.done_at - 1) / 365.0) - 1)
+      end
+      pv = latent_pv + actual_pv
+
       items[fund.name] = {
         '#id': fund.id,
         name: fund.name,
-        isin: "",
-        shares: 0,
-        invested: 0,
-        value: 0,
-        pv: 0,
+        isin: nil,
+        shares: nil,
+        invested: invested,
+        value: invested + pv,
+        pv: pv
       }
 
     end
 
-    transactions.includes(:fund).each do |transaction|
+    puts Hirb::Helpers::AutoTable.render(items.values)
 
-      item = items[transaction.fund.name]
-      item[:shares] += transaction.shares
-      item[:invested] += transaction.amount.round(2)
-      item[:value] += transaction.current_value.round(2)
-      item[:pv] += item[:value] - item[:invested]
+    invested = Amount.new(0, "EUR", Date.today)
+    value = Amount.new(0, "EUR", Date.today)
+    pv = Amount.new(0, "EUR", Date.today)
 
+    items.values.each do |h|
+      invested += h[:invested]
+      value += h[:value]
+      pv += h[:pv]
     end
 
-    puts Hirb::Helpers::AutoTable.render(items.values)
+    puts "Invested: #{invested} / Current: #{value} / PV: #{pv}"
 
   end
 end

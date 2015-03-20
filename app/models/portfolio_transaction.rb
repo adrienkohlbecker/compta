@@ -24,10 +24,6 @@ class PortfolioTransaction < ActiveRecord::Base
     fund.quotation_at(done_at)
   end
 
-  def current_value
-    fund.quotation_at(Date.today) * shares
-  end
-
   def amount
     @_amount ||= Amount.new(amount_original, amount_currency, amount_date)
   end
