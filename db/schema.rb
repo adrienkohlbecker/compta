@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150319231431) do
+ActiveRecord::Schema.define(version: 20150320010344) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,17 +30,6 @@ ActiveRecord::Schema.define(version: 20150319231431) do
     t.decimal  "value",       precision: 15, scale: 5
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
-  end
-
-  create_table "euro_fund_investments", force: :cascade do |t|
-    t.integer  "euro_fund_id"
-    t.decimal  "amount_original", precision: 15, scale: 5
-    t.string   "amount_currency"
-    t.date     "amount_date"
-    t.date     "value_at"
-    t.integer  "portfolio_id"
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
   end
 
   create_table "euro_funds", force: :cascade do |t|
@@ -90,8 +79,6 @@ ActiveRecord::Schema.define(version: 20150319231431) do
   end
 
   add_foreign_key "currency_quotations", "currencies"
-  add_foreign_key "euro_fund_investments", "euro_funds"
-  add_foreign_key "euro_fund_investments", "portfolios"
   add_foreign_key "opcvm_quotations", "opcvm_funds"
   add_foreign_key "portfolio_transactions", "portfolios"
 end
