@@ -40,25 +40,26 @@ class Portfolio < ActiveRecord::Base
 
   def print_list
 
-    items = {}
-    OpcvmFund.all.each do |fund|
+    items = []
+    OpcvmFund.order(:id).each do |fund|
 
       shares = PortfolioTransaction.where(fund: fund).pluck(:shares).reduce(:+)
-      invested = PortfolioTransaction.where(fund: fund).map(&:amount).reduce(:+).to_eur
+      invested = PortfolioTransaction.where(fund: fund, category: "Virement").map(&:amount).reduce(:+).to_eur
       current_value = (fund.quotation_at(Date.today) * shares).to_eur
 
-      items[fund.name] = {
+      items << {
         '#id': fund.id,
         name: fund.name,
         isin: fund.isin,
         shares: shares,
         invested: invested,
         value: current_value,
-        pv: current_value - invested
+        pv: current_value - invested,
+        '%': (current_value / invested * 100 - 100).round(2)
       }
 
     end
-    EuroFund.all.each do |fund|
+    EuroFund.order(:id).each do |fund|
 
       invested = PortfolioTransaction.where(fund: fund, category: 'Virement').map(&:amount).reduce(:+)
       actual_pv = PortfolioTransaction.where(fund: fund).where.not(category: 'Virement').map(&:amount).reduce(:+)
@@ -73,31 +74,32 @@ class Portfolio < ActiveRecord::Base
       end
       pv = latent_pv + actual_pv
 
-      items[fund.name] = {
+      items << {
         '#id': fund.id,
         name: fund.name,
         isin: nil,
         shares: nil,
         invested: invested,
         value: invested + pv,
-        pv: pv
+        pv: pv,
+        '%': ((invested + pv) / invested * 100 - 100).round(2)
       }
 
     end
 
-    puts Hirb::Helpers::AutoTable.render(items.values)
+    puts Hirb::Helpers::AutoTable.render(items)
 
     invested = Amount.new(0, "EUR", Date.today)
     value = Amount.new(0, "EUR", Date.today)
     pv = Amount.new(0, "EUR", Date.today)
 
-    items.values.each do |h|
+    items.each do |h|
       invested += h[:invested]
       value += h[:value]
       pv += h[:pv]
     end
 
-    puts "Invested: #{invested} / Current: #{value} / PV: #{pv}"
+    puts "Invested: #{invested} / Current: #{value} / PV: #{pv} / %: #{(value / invested * 100 - 100).round(2)}"
 
   end
 end
