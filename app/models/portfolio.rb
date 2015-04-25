@@ -102,4 +102,26 @@ class Portfolio < ActiveRecord::Base
     puts "Invested: #{invested} / Current: #{value} / PV: #{pv} / %: #{(value / invested * 100 - 100).round(2)}"
 
   end
+
+  def print_transactions
+
+    items = []
+
+    transactions.order(:done_at, :fund_type, :fund_id).each do |t|
+
+      items << {
+        '#id': t.id,
+        date: t.done_at,
+        name: t.fund.name,
+        isin: t.fund.try(:isin),
+        shares: t.shares.try(:round, 4),
+        amount: t.amount
+      }
+
+    end
+
+    puts Hirb::Helpers::AutoTable.render(items)
+
+  end
+
 end
