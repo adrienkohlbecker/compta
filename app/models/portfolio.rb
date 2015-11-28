@@ -115,7 +115,9 @@ class Portfolio < ActiveRecord::Base
         name: t.fund.name,
         isin: t.fund.try(:isin),
         shares: t.shares.try(:round, 4),
-        amount: t.amount
+        amount: t.amount,
+        shareprice: t.shareprice,
+        category: t.category
       }
 
     end

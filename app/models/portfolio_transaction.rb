@@ -38,4 +38,20 @@ class PortfolioTransaction < ActiveRecord::Base
     self.amount_date = new_amount.at
     self.amount_original = new_amount.value
   end
+
+  def shareprice
+    return nil if shareprice_original.nil?
+    @_shareprice ||= Amount.new(shareprice_original, shareprice_currency, shareprice_date)
+  end
+
+  def shareprice=(new_shareprice)
+
+    if new_shareprice.class != Amount
+      raise "Trying to set shareprice to something other than Amount"
+    end
+
+    self.shareprice_currency = new_shareprice.currency
+    self.shareprice_date = new_shareprice.at
+    self.shareprice_original = new_shareprice.value
+  end
 end

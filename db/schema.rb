@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150320010832) do
+ActiveRecord::Schema.define(version: 20150516124653) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,16 +70,19 @@ ActiveRecord::Schema.define(version: 20150320010832) do
 
   create_table "portfolio_transactions", force: :cascade do |t|
     t.integer  "fund_id"
-    t.decimal  "shares",          precision: 15, scale: 5
+    t.decimal  "shares",              precision: 15, scale: 5
     t.integer  "portfolio_id"
     t.date     "done_at"
-    t.decimal  "amount_original", precision: 15, scale: 5
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
+    t.decimal  "amount_original",     precision: 15, scale: 5
+    t.datetime "created_at",                                   null: false
+    t.datetime "updated_at",                                   null: false
     t.string   "amount_currency"
     t.date     "amount_date"
     t.string   "fund_type"
     t.string   "category"
+    t.decimal  "shareprice_original", precision: 15, scale: 5
+    t.date     "shareprice_date"
+    t.string   "shareprice_currency"
   end
 
   create_table "portfolios", force: :cascade do |t|
