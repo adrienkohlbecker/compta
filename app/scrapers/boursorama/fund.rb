@@ -33,7 +33,7 @@ class Boursorama::Fund
   end
 
   def isin
-    doc.css('.fv-isin').first.content.split('-').first.strip
+    doc.css('.fv-isin').first.content.split('-').first.strip.split(/\s/)[0]
   end
 
   def quotation
@@ -46,6 +46,14 @@ class Boursorama::Fund
 
       if tr.css('td')[0].content.strip.gsub(/\302\240/, '') == 'Date'
         date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ''))
+      end
+
+      if tr.css('small[title="Données temps réel"]').length > 0
+        if Time.now.hour < 9 # avant l'ouverture, la page date d'hier
+          date = Date.yesterday
+        else
+          date = Date.today
+        end
       end
 
     end

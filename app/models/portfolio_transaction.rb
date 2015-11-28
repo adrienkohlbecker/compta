@@ -25,6 +25,7 @@ class PortfolioTransaction < ActiveRecord::Base
   end
 
   def amount
+    return nil if amount_original.nil?
     @_amount ||= Amount.new(amount_original, amount_currency, amount_date)
   end
 

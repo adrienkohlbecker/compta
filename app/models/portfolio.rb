@@ -43,8 +43,8 @@ class Portfolio < ActiveRecord::Base
     items = []
     OpcvmFund.order(:id).each do |fund|
 
-      shares = PortfolioTransaction.where(fund: fund).pluck(:shares).reduce(:+)
-      invested = PortfolioTransaction.where(fund: fund, category: "Virement").map(&:amount).reduce(:+).to_eur
+      shares = PortfolioTransaction.where(fund: fund).pluck(:shares).reduce(:+) || 0
+      invested = PortfolioTransaction.where(fund: fund, category: "Virement").map(&:amount).reduce(:+).try(:to_eur) || 0
       current_value = (fund.quotation_at(Date.today) * shares).to_eur
 
       items << {
@@ -107,7 +107,7 @@ class Portfolio < ActiveRecord::Base
 
     items = []
 
-    transactions.order(:done_at, :fund_type, :fund_id).each do |t|
+    transactions.includes(:fund).order(:done_at, :fund_type, :fund_id).each do |t|
 
       items << {
         '#id': t.id,
