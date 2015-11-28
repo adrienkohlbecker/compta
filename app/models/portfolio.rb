@@ -126,4 +126,36 @@ class Portfolio < ActiveRecord::Base
 
   end
 
+  def invested_at(date)
+    transactions.where(fund_type: "OpcvmFund", category: "Virement").where("done_at <= ?", date).map(&:amount).reduce(:+)
+  end
+
+  def value_at(date)
+    transactions.where(fund_type: "OpcvmFund").where("done_at <= ?", date).map{|t| t.shares * t.fund.quotation_at(date).to_eur}.reduce(:+)
+  end
+
+  def print_performance
+
+    start_date = transactions.order("done_at ASC").first.done_at
+    end_date = Date.today
+
+    items = []
+
+    (start_date..end_date).each do |date|
+
+      value = value_at(date)
+      invested = invested_at(date)
+      pv = value - invested
+
+      items << {
+        date: date,
+        invested: invested,
+        value: value.round(2),
+        pv: pv.round(2)
+      }
+    end
+
+    puts Hirb::Helpers::AutoTable.render(items)
+
+  end
 end
