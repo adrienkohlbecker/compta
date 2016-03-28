@@ -2,6 +2,10 @@ class Amount < BigDecimal
 
   attr_accessor :value, :currency, :at
 
+  def self.zero
+    Amount.new(BigDecimal.new('0'), 'EUR', Date.today)
+  end
+
   def initialize(value, currency, at)
     super(value)
     @value = value
@@ -96,7 +100,7 @@ class Amount < BigDecimal
   alias_method :original_to_s, :to_s
 
   def to_s(arg = nil)
-    "#{round(2).to_s(arg)} #{currency}"
+    "#{'%.2f' % round(2)} #{currency}"
   end
 
 end

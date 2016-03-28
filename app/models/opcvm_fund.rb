@@ -31,16 +31,20 @@ class OpcvmFund < ActiveRecord::Base
 
   def refresh_quotation_history
 
-    history = Boursorama::QuotationHistory.new(self.boursorama_id, :weekly).quotation_history
+    transaction do
 
-    history.each do |date, value|
-      append_or_refresh_quotation(date, value)
-    end
+      history = Boursorama::QuotationHistory.new(self.boursorama_id, :weekly).quotation_history
 
-    history = Boursorama::QuotationHistory.new(self.boursorama_id, :daily).quotation_history
+      history.each do |date, value|
+        append_or_refresh_quotation(date, value)
+      end
 
-    history.each do |date, value|
-      append_or_refresh_quotation(date, value)
+      history = Boursorama::QuotationHistory.new(self.boursorama_id, :daily).quotation_history
+
+      history.each do |date, value|
+        append_or_refresh_quotation(date, value)
+      end
+
     end
 
     nil
