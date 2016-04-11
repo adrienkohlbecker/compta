@@ -1,6 +1,7 @@
 def refresh_quotations!
   [Currency, OpcvmFund].map do |model|
-    model.all.reverse.map do |item|
+    query = (model == OpcvmFund) ? model.where(closed: false) : model
+    query.all.reverse.map do |item|
       item.refresh_data
       item.refresh_quotation_history
     end

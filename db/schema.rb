@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160313224012) do
+ActiveRecord::Schema.define(version: 20160411135657) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,9 +59,11 @@ ActiveRecord::Schema.define(version: 20160313224012) do
     t.string   "isin"
     t.string   "name"
     t.string   "boursorama_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
     t.string   "currency"
+    t.boolean  "closed",        default: false, null: false
+    t.date     "closed_date"
   end
 
   create_table "opcvm_quotations", force: :cascade do |t|
