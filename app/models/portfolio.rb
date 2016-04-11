@@ -116,20 +116,20 @@ class Portfolio < ActiveRecord::Base
 
     end
 
-    items
+    items.sort do |a, b|
+      if b[:invested].nil?
+        -1
+      elsif a[:invested].nil?
+        1
+      else
+        b[:invested] <=> a[:invested]
+      end
+    end
   end
 
   def print_situation(date = Date.today)
 
     items = list_situation(date)
-    items = items.map { |item|
-      item[:shares] = '%.5f' % item[:shares].round(5) unless item[:shares].nil?
-      item[:'%'] = '%.2f' % (item[:'%'] * 100).round(2) unless item[:'%'].nil?
-      item.delete(:kind)
-      item
-    }
-
-    puts Hirb::Helpers::AutoTable.render(items)
 
     invested = Amount.new(0, "EUR", Date.today)
     value = Amount.new(0, "EUR", Date.today)
@@ -141,6 +141,18 @@ class Portfolio < ActiveRecord::Base
       pv += h[:pv] || 0
     end
 
+    items = items.map { |item|
+      item[:'#id'] = '%2s' % item[:'#id']
+      item[:shares] = '%8s' % ('%.5f' % item[:shares].round(5)) unless item[:shares].nil?
+      item[:'%'] = '%6s' % ('%.2f' % (item[:'%'] * 100).round(2)) unless item[:'%'].nil?
+      item[:invested] = '%11s' % item[:invested]
+      item[:pv] = '%10s' % item[:pv]
+      item[:value] = '%11s' % item[:value]
+      item.delete(:kind)
+      item
+    }
+
+    puts Hirb::Helpers::AutoTable.render(items)
     puts "Invested: #{invested} / Current: #{value} / PV: #{pv} / %: #{(value / invested * 100 - 100).round(2)}"
 
   end
