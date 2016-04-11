@@ -154,7 +154,7 @@ class Portfolio < ActiveRecord::Base
       items << {
         '#id': t.id,
         date: t.done_at,
-        name: t.fund.name,
+        name: t.fund.try(:name),
         isin: t.fund.try(:isin),
         shares: t.shares,
         amount: t.amount,
