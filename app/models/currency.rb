@@ -49,7 +49,8 @@ class Currency < ActiveRecord::Base
   end
 
   def quotation_at(date)
-    quotations.order("date DESC").where("date <= ?", date).first.value.in_currency(name, date)
+    date = date.is_a?(Date) ? date : Date.parse(date)
+    Matview::EurToCurrency.where(date: date, currency_id: id).first.value.in_currency(name, date)
   end
 
   def append_or_refresh_quotation(date, value)

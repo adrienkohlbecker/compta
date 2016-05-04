@@ -52,7 +52,7 @@ class OpcvmFund < ActiveRecord::Base
   end
 
   def quotation_at(date)
-    quotations.order("date DESC").where("date <= ?", date).first.value
+    Matview::OpcvmQuotationsFilled.where(date: date, opcvm_fund_id: id).first.value
   end
 
   def append_or_refresh_quotation(date, value)

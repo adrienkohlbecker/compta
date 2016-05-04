@@ -14,7 +14,6 @@ class EuroFund < ActiveRecord::Base
   has_many :interest_rates, as: :object
 
   def current_interest_rate(date = Date.today)
-    object = interest_rates.where('"from" <= ?', date).where('"to" > ?', date).first
-    (object.served_rate || object.minimal_rate) * (1 - object.social_tax_rate)
+    Matview::EuroFundInterestFilled.where(date: date, euro_fund_id: id).first.rate_for_computation
   end
 end

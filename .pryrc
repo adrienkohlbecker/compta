@@ -6,6 +6,7 @@ def refresh_quotations!
       item.refresh_quotation_history
     end
   end
+  Matview::Base.refresh_all
 end
 
 begin

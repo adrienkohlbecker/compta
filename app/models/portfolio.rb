@@ -41,77 +41,19 @@ class Portfolio < ActiveRecord::Base
   def list_situation(date = Date.today)
 
     items = []
-    OpcvmFund.order(:id).each do |fund|
 
-      shares = PortfolioTransaction.where(fund: fund).where('done_at < ?', date).pluck(:shares).reduce(:+) || Amount.zero
-      invested = PortfolioTransaction.where(fund: fund, category: "Virement").where('done_at < ?', date).map(&:amount).reduce(:+).try(:to_eur) || Amount.zero
-      invested += PortfolioTransaction.where(fund: fund, category: "Arbitrage").where('done_at < ?', date).map(&:amount).reduce(:+).try(:to_eur) || Amount.zero
-      current_value = (fund.quotation_at(date) * shares).to_eur
-
-      pv = current_value - invested
-      percent = (current_value / invested - 1).value
-
-      if shares <= 0.0001
-        shares = nil
-        percent = nil
-        current_value = nil
-      end
-
-      if invested == 0
-        invested = nil
-      end
-
-      if pv == 0
-        pv = nil
-      end
+    Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
 
       items << {
-        kind: 'OPCVM',
-        '#id': fund.id,
-        name: fund.name,
-        isin: fund.isin,
-        shares: shares,
-        invested: invested,
-        value: current_value,
-        pv: pv,
-        '%': percent
-      }
-
-    end
-    EuroFund.order(:id).each do |fund|
-
-      invested = PortfolioTransaction.where(fund: fund, category: 'Virement').where('done_at < ?', date).map(&:amount).reduce(:+) || 0
-      invested += PortfolioTransaction.where(fund: fund, category: 'Arbitrage').where('done_at < ?', date).map(&:amount).reduce(:+) || 0
-      actual_pv = PortfolioTransaction.where(fund: fund).where('done_at < ?', date).where.not(category: 'Virement').where.not(category: 'Arbitrage').map(&:amount).reduce(:+) || 0
-
-      rate = fund.current_interest_rate(date)
-
-      value_at_beginning_of_year = PortfolioTransaction.where(fund: fund).where('done_at < ?', date.beginning_of_year).map(&:amount).reduce(:+) || 0
-      latent_pv = value_at_beginning_of_year * ((1 + rate) ** ((date - date.beginning_of_year) / 365.0) - 1)
-
-      PortfolioTransaction.where(fund: fund).where('done_at >= ?', date.beginning_of_year).where('done_at < ?', date).order('done_at ASC').each do |t|
-        latent_pv += t.amount * ((1 + rate) ** ((date - t.done_at - 1) / 365.0) - 1)
-      end
-      pv = latent_pv + actual_pv
-
-      if invested == 0
-        invested = nil
-      end
-
-      if pv == 0
-        pv = nil
-      end
-
-      items << {
-        kind: 'EUR',
-        '#id': fund.id,
-        name: fund.name,
-        isin: nil,
-        shares: nil,
-        invested: invested,
-        value: invested + pv,
-        pv: pv,
-        '%': ((invested + pv) / invested - 1).value
+        kind: item.fund_type.gsub('Fund', '').upcase,
+        '#id': item.fund_id,
+        name: item.fund.name,
+        isin: item.fund.try(:isin),
+        shares: item.shares,
+        invested: item.invested,
+        value: item.current_value,
+        pv: item.pv,
+        '%': item.percent
       }
 
     end
@@ -213,18 +155,15 @@ class Portfolio < ActiveRecord::Base
 
     items = []
 
-    (start_date..end_date).each do |date|
-
-      value = value_at(date)
-      invested = invested_at(date)
-      pv = value - invested
+    Matview::PortfolioPerformance.where(portfolio_id: id).where('date >= ?', start_date).where('date <= ?', end_date).each do |item|
 
       items << {
-        date: date,
-        invested: invested,
-        value: value,
-        pv: pv
+        date: item.date,
+        invested: item.invested,
+        value: item.current_value,
+        pv: item.pv
       }
+
     end
 
     items
