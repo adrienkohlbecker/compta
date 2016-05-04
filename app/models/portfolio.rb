@@ -165,8 +165,9 @@ class Portfolio < ActiveRecord::Base
 
     items = list_performance(start_date)
     items = items.map do |item|
-      item[:value] = item[:value].round(2)
-      item[:pv] = item[:pv].round(2)
+      item[:invested] = '%11s' % item[:invested]
+      item[:value] = '%11s' % item[:value]
+      item[:pv] = '%11s' % item[:pv]
       item
     end
 
@@ -237,6 +238,14 @@ class Portfolio < ActiveRecord::Base
 
       sheet.add_chart(Axlsx::LineChart, :start_at => [5,2], :end_at => [20, 40], :title => 'Performance') do |chart|
         chart.add_series :data => sheet["D2:D#{row_count+1}"], :labels => sheet["A2:A#{row_count+1}"], :title => 'PV'
+
+        chart.style = 1
+
+        chart.catAxis.format_code = 'dd/mm/yyyy'
+        chart.catAxis.label_rotation = -45
+        chart.catAxis.tick_lbl_pos = :low
+
+        chart.valAxis.format_code = '# ##0.00 €;[Red]- # ##0.00 €'
       end
     end
 
