@@ -73,15 +73,14 @@ class Portfolio < ActiveRecord::Base
 
     items = list_situation(date)
 
-    invested = Amount.new(0, "EUR", Date.today)
-    value = Amount.new(0, "EUR", Date.today)
-    pv = Amount.new(0, "EUR", Date.today)
 
+    value = Amount.new(0, "EUR", Date.today)
     items.each do |h|
-      invested += h[:invested] || 0
       value += h[:value] || 0
-      pv += h[:pv] || 0
     end
+
+    invested = invested_at(Date.today)
+    pv = value - invested
 
     items = items.map { |item|
       item[:'#id'] = '%2s' % item[:'#id']
@@ -135,15 +134,7 @@ class Portfolio < ActiveRecord::Base
   end
 
   def invested_at(date)
-    amount = transactions.where(category: "Virement").where("done_at <= ?", date).map{|t| t.amount.to_eur}.reduce(:+) || 0
-    amount += transactions.where(category: "Arbitrage").where("done_at <= ?", date).map{|t| t.amount.to_eur}.reduce(:+) || 0
-    amount
-  end
-
-  def value_at(date)
-    ret = transactions.where(fund_type: "OpcvmFund").where("done_at <= ?", date).map{|t| (t.fund.quotation_at(date) * t.shares).to_eur}.reduce(:+) || 0
-    ret += transactions.where(fund_type: "EuroFund").where("done_at <= ?", date).map{|t| t.amount.to_eur}.reduce(:+) || 0
-    ret
+    transactions.where(category: ["Virement", "Arbitrage"]).where("done_at <= ?", date).map{|t| t.amount.to_eur}.reduce(:+) || 0
   end
 
   def list_performance(start_date = nil)
