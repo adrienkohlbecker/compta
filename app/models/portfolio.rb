@@ -175,7 +175,7 @@ class Portfolio < ActiveRecord::Base
 
   end
 
-  def excel
+  def excel(path='.')
 
     p = Axlsx::Package.new
     wb = p.workbook
@@ -249,7 +249,7 @@ class Portfolio < ActiveRecord::Base
       end
     end
 
-    p.serialize 'export.xlsx'
+    p.serialize "#{path}/#{name}.xlsx"
 
   end
 end
