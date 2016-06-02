@@ -60,4 +60,8 @@ class OpcvmFund < ActiveRecord::Base
     c.value = Amount.new(value, currency, date)
     c.save!
   end
+
+  def gnucash_commodity
+    GnuCash::Commodity.where(cusip: isin).first
+  end
 end

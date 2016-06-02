@@ -14,6 +14,8 @@ class Currency < ActiveRecord::Base
 
   has_many :quotations, class_name: 'CurrencyQuotation'
 
+  has_one :gnucash_commodity, foreign_key: :mnemonic, primary_key: :name, class_name: 'GnuCash::Commodity'
+
   def refresh_data
 
     data = Boursorama::Currency.new(url).export
