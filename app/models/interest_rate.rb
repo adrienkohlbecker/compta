@@ -32,9 +32,9 @@ class InterestRate < ActiveRecord::Base
     return candidate if delta < 0.001 && delta > - 0.001
 
     if delta < 0
-      return equivalent_interest_rate(transactions, current_value, candidate, upper_bound, max_iter - 1)
+      return equivalent_rate(transactions, current_value, candidate, upper_bound, max_iter - 1)
     else
-      return equivalent_interest_rate(transactions, current_value, lower_bound, candidate, max_iter - 1)
+      return equivalent_rate(transactions, current_value, lower_bound, candidate, max_iter - 1)
     end
   end
 end
