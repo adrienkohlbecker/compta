@@ -44,6 +44,8 @@ class Portfolio < ActiveRecord::Base
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
 
+      next if item.invested.nil?
+
       items << {
         kind: item.fund_type.gsub('Fund', '').upcase,
         '#id': item.fund_id,
@@ -59,20 +61,13 @@ class Portfolio < ActiveRecord::Base
     end
 
     items.sort do |a, b|
-      if b[:invested].nil?
-        -1
-      elsif a[:invested].nil?
-        1
-      else
-        b[:invested] <=> a[:invested]
-      end
+      b[:invested] <=> a[:invested]
     end
   end
 
   def print_situation(date = Date.today)
 
     items = list_situation(date)
-
 
     value = Amount.new(0, "EUR", Date.today)
     items.each do |h|
