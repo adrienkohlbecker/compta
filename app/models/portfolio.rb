@@ -44,6 +44,12 @@ class Portfolio < ActiveRecord::Base
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
 
+      eq_percent = nil
+      tr = Matview::PortfolioTransactionsEur.where(fund_id: item.fund_id, fund_type: item.fund_type, portfolio_id: id)
+      if tr.any? && !item.current_value.nil?
+        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1)
+      end
+
       next if item.invested.nil?
 
       items << {
@@ -55,7 +61,8 @@ class Portfolio < ActiveRecord::Base
         invested: item.invested,
         value: item.current_value,
         pv: item.pv,
-        '%': item.percent
+        '%': item.percent,
+        'eq%': eq_percent
       }
 
     end
@@ -81,6 +88,7 @@ class Portfolio < ActiveRecord::Base
       item[:'#id'] = '%2s' % item[:'#id']
       item[:shares] = '%8s' % ('%.5f' % item[:shares].round(5)) unless item[:shares].nil?
       item[:'%'] = '%6s' % ('%.2f' % (item[:'%'] * 100).round(2)) unless item[:'%'].nil?
+      item[:'eq%'] = '%6s' % ('%.2f' % (item[:'eq%'] * 100).round(2)) unless item[:'eq%'].nil?
       item[:invested] = '%11s' % item[:invested]
       item[:pv] = '%10s' % item[:pv]
       item[:value] = '%11s' % item[:value]
@@ -182,7 +190,7 @@ class Portfolio < ActiveRecord::Base
 
     wb.add_worksheet(:name => "Situation") do |sheet|
 
-      sheet.add_row ["Kind", "ID", "Name", "ISIN", "Shares", "Invested", "Value", "PV", "Percent"]
+      sheet.add_row ["Kind", "ID", "Name", "ISIN", "Shares", "Invested", "Value", "PV", "Percent", "Eq Pct"]
 
       list_situation.each do |item|
 
@@ -190,8 +198,8 @@ class Portfolio < ActiveRecord::Base
         value = item[:value].nil? ? nil : item[:value].value
         pv = item[:pv].nil? ? nil : item[:pv].value
 
-        sheet.add_row [item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], invested, value, pv, item[:'%']],
-          style: [nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_percent]
+        sheet.add_row [item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], invested, value, pv, item[:'%'], item[:'eq%']],
+          style: [nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_percent, style_percent]
       end
 
       sheet.auto_filter = 'A1:C1'
