@@ -1,0 +1,61 @@
+---
+version: "2"
+services:
+  main:
+    build: .
+    volumes:
+      - .:/app/compta
+      - ~/Dropbox/Applications/Compta:/dropbox
+      - ~/Dropbox/Applications/Gnucash:/gnucash
+      - ~/.pryrc:/root/.pryrc
+      - ~/.pry_history:/root/.pry_history
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    links:
+      - db
+      - redis
+
+  postgres:
+    image: kohlby/postgres
+    environment:
+      POSTGRES_ENABLE_SSL: 'yes'
+      POSTGRES_PASSWORD: mysecretpassword
+      PGPASSWORD: mysecretpassword
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+  redis:
+    image: redis:3.2-alpine
+
+  db:
+    extends: postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "65432:5432"
+
+  psql:
+    extends: postgres
+    entrypoint: psql --host=db --port=5432 --username=postgres --dbname=compta_development
+    volumes:
+      - .:/app/compta
+      - ~/Dropbox/Applications/Compta:/dropbox
+    links:
+      - db
+
+  pg_dump:
+    extends: postgres
+    entrypoint: pg_dump --host=db --port=5432 --username=postgres --dbname=compta_development
+    volumes:
+      - .:/app/compta
+      - ~/Dropbox/Applications/Compta:/dropbox
+    links:
+      - db
+
+  pg_restore:
+    extends: postgres
+    entrypoint: pg_restore --host=db --port=5432 --username=postgres --dbname=compta_development
+    volumes:
+      - .:/app/compta
+      - ~/Dropbox/Applications/Compta:/dropbox
+    links:
+      - db

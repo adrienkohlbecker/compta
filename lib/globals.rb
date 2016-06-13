@@ -16,7 +16,3 @@ def excel_export!(path)
     portfolio.excel(path)
   end
 end
-
-def backup!(path)
-  `pg_dump --format=p --verbose --encoding=UTF-8 --no-owner --no-privileges --inserts --dbname=compta-backend_development --file=#{path}/#{Date.today.strftime('%d')}.sql`
-end

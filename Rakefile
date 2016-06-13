@@ -10,9 +10,5 @@ task :daily => :environment do
   puts 'Refreshing quotations...'
   refresh_quotations!
   puts 'Exporting excel files...'
-  excel_export!('/Users/adrien/Dropbox/Applications/Compta')
-  puts 'Backing up raw data'
-  backup!('/Users/adrien/Dropbox/Applications/Compta/backups')
-  puts 'Notify Deadmansnitch'
-  Net::HTTP.get(URI('https://nosnch.in/2f07697414'))
+  excel_export!('/dropbox')
 end
