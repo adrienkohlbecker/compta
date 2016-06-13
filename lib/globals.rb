@@ -8,6 +8,7 @@ def refresh_quotations!
     end
   end
   Matview::Base.refresh_all
+  GnuCash.refresh_from_quotations
 end
 
 def excel_export!(path)
