@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module GnuCash
   def self.refresh_from_quotations
     GnuCash::Base.connection.execute('CREATE INDEX IF NOT EXISTS compta_index_prices ON prices (date, commodity_guid, source)')
@@ -10,7 +11,6 @@ module GnuCash
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-
         Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2015, 01, 01)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
@@ -22,7 +22,6 @@ module GnuCash
           price.value_denom = value.denominator
           price.save!
         end
-
       end
     end
 
@@ -31,7 +30,6 @@ module GnuCash
       raise "Could not find commodity for currency #{currency.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-
         Matview::EurToCurrency.where(currency_name: currency.name).where('date >= ?', Date.new(2015, 01, 01)).where.not(value: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
@@ -44,7 +42,6 @@ module GnuCash
           price.value_denom = value.denominator
           price.save!
         end
-
       end
     end
   end

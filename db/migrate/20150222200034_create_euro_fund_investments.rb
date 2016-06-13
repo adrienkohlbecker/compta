@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateEuroFundInvestments < ActiveRecord::Migration
   def change
     create_table :euro_fund_investments do |t|

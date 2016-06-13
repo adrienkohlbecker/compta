@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class RemoveEuroFundQuotations < ActiveRecord::Migration
   def change
     rename_table :fund_quotations, :opcvm_quotations

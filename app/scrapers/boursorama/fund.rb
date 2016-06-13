@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'nokogiri'
 
 class Boursorama::Fund
@@ -43,19 +44,16 @@ class Boursorama::Fund
   def quotation_date
     date = nil
     doc.css('#fiche_cours_details tr').each do |tr|
-
       if tr.css('td')[0].content.strip.gsub(/\302\240/, '') == 'Date'
         date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ''))
       end
 
-      if tr.css('small[title="Données temps réel"]').length > 0
-        if Time.now.hour < 9 # avant l'ouverture, la page date d'hier
-          date = Date.yesterday
-        else
-          date = Date.today
-        end
-      end
-
+      next if tr.css('small[title="Données temps réel"]').empty?
+      date = if Time.now.hour < 9 # avant l'ouverture, la page date d'hier
+               Date.yesterday
+             else
+               Date.today
+             end
     end
     date
   end

@@ -1,10 +1,10 @@
+# frozen_string_literal: true
 require 'json'
 
 class Boursorama::QuotationHistory
   VERSION = 1
 
   def initialize(symbol, period = :daily)
-
     if period == :daily
       pe = '0'
       duree = '36'

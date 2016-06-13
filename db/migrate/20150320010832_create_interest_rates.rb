@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateInterestRates < ActiveRecord::Migration
   def change
     create_table :interest_rates do |t|

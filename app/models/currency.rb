@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: currencies
@@ -11,43 +12,36 @@
 #
 
 class Currency < ActiveRecord::Base
-
   has_many :quotations, class_name: 'CurrencyQuotation'
 
   has_one :gnucash_commodity, foreign_key: :mnemonic, primary_key: :name, class_name: 'GnuCash::Commodity'
 
   def refresh_data
-
     data = Boursorama::Currency.new(url).export
 
     self.boursorama_id = data[:boursorama_id]
     self.name = data[:name]
-    self.save!
+    save!
 
     append_or_refresh_quotation(data[:quotation_date], data[:quotation])
-
   end
 
   def refresh_quotation_history
-
     transaction do
-
-      history = Boursorama::QuotationHistory.new(self.boursorama_id, :weekly).quotation_history
-
-      history.each do |date, value|
-        append_or_refresh_quotation(date, value)
-      end
-
-      history = Boursorama::QuotationHistory.new(self.boursorama_id, :daily).quotation_history
+      history = Boursorama::QuotationHistory.new(boursorama_id, :weekly).quotation_history
 
       history.each do |date, value|
         append_or_refresh_quotation(date, value)
       end
 
+      history = Boursorama::QuotationHistory.new(boursorama_id, :daily).quotation_history
+
+      history.each do |date, value|
+        append_or_refresh_quotation(date, value)
+      end
     end
 
     nil
-
   end
 
   def quotation_at(date)

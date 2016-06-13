@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class RenameOpcvmTransaction < ActiveRecord::Migration
   def change
     rename_table :opcvm_quotations, :fund_quotations

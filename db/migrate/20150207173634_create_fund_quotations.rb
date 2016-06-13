@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateFundQuotations < ActiveRecord::Migration
   def change
     create_table :fund_quotations do |t|

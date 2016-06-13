@@ -1,5 +1,5 @@
+# frozen_string_literal: true
 class Amount < BigDecimal
-
   attr_accessor :value, :currency, :at
 
   def self.zero
@@ -14,7 +14,6 @@ class Amount < BigDecimal
   end
 
   def ==(other)
-
     a = self
     b = other
 
@@ -25,11 +24,9 @@ class Amount < BigDecimal
     else
       a.value == b
     end
-
   end
 
   def *(other)
-
     a = self
     b = other
 
@@ -40,11 +37,9 @@ class Amount < BigDecimal
     else
       Amount.new(a.value * b, a.currency, a.at)
     end
-
   end
 
   def /(other)
-
     a = self
     b = other
 
@@ -55,11 +50,9 @@ class Amount < BigDecimal
     else
       Amount.new(a.value / b, a.currency, a.at)
     end
-
   end
 
   def +(other)
-
     a = self
     b = other
 
@@ -70,11 +63,9 @@ class Amount < BigDecimal
     else
       Amount.new(a.value + b, a.currency, a.at)
     end
-
   end
 
   def -(other)
-
     a = self
     b = other
 
@@ -85,7 +76,6 @@ class Amount < BigDecimal
     else
       Amount.new(a.value - b, a.currency, a.at)
     end
-
   end
 
   def to_eur
@@ -97,10 +87,9 @@ class Amount < BigDecimal
     Amount.new(converted_value, symbol, at)
   end
 
-  alias_method :original_to_s, :to_s
+  alias original_to_s to_s
 
-  def to_s(arg = nil)
-    "#{'%.2f' % round(2)} #{currency}"
+  def to_s(_arg = nil)
+    format('%.2f %s', round(2), currency)
   end
-
 end

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateCurrencyQuotations < ActiveRecord::Migration
   def change
     create_table :currency_quotations do |t|

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 def refresh_quotations!
   [Currency, OpcvmFund].map do |model|
     query = (model == OpcvmFund) ? model.where(closed: false) : model

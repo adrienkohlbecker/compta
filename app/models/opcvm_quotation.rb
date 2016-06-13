@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: opcvm_quotations
@@ -20,9 +21,8 @@ class OpcvmQuotation < ActiveRecord::Base
   end
 
   def value=(amount)
-
     if amount.class != Amount
-      raise "Trying to set value to something other than Amount"
+      raise 'Trying to set value to something other than Amount'
     end
 
     self.value_currency = amount.currency

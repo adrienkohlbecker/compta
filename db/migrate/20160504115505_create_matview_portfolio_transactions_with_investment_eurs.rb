@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateMatviewPortfolioTransactionsWithInvestmentEurs < ActiveRecord::Migration
   def up
     execute %(

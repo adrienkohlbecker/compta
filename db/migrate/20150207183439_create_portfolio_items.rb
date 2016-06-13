@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreatePortfolioItems < ActiveRecord::Migration
   def change
     create_table :portfolio_transactions do |t|

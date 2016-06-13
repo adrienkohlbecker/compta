@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Matview::PortfolioPerformance < Matview::Base
   def invested
     @_invested ||= self[:invested].nil? ? nil : Amount.new(self[:invested], 'EUR', date)

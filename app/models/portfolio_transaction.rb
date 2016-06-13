@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: portfolio_transactions
@@ -30,9 +31,8 @@ class PortfolioTransaction < ActiveRecord::Base
   end
 
   def amount=(new_amount)
-
     if new_amount.class != Amount
-      raise "Trying to set amount to something other than Amount"
+      raise 'Trying to set amount to something other than Amount'
     end
 
     self.amount_currency = new_amount.currency
@@ -46,9 +46,8 @@ class PortfolioTransaction < ActiveRecord::Base
   end
 
   def shareprice=(new_shareprice)
-
     if new_shareprice.class != Amount
-      raise "Trying to set shareprice to something other than Amount"
+      raise 'Trying to set shareprice to something other than Amount'
     end
 
     self.shareprice_currency = new_shareprice.currency

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Matview::PortfolioHistory < Matview::Base
   belongs_to :fund, polymorphic: true
 

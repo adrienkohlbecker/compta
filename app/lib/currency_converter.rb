@@ -1,6 +1,6 @@
+# frozen_string_literal: true
 class CurrencyConverter
-
-  def convert(value, at, from, to = "EUR")
+  def convert(value, at, from, to = 'EUR')
     if to == from
       value
     else
@@ -9,11 +9,10 @@ class CurrencyConverter
   end
 
   private def to_eur_at(at, symbol)
-    if symbol == "EUR"
+    if symbol == 'EUR'
       1
     else
       Currency.where(name: symbol).first.quotation_at(at)
     end
   end
-
 end

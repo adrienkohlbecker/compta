@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class AmountToOriginalAmount < ActiveRecord::Migration
   def change
     rename_column :fund_quotations, :value, :value_original
