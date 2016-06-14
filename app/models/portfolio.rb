@@ -38,9 +38,11 @@ class Portfolio < ActiveRecord::Base
   def list_situation(date = Date.today)
     items = []
 
+    trs = Matview::PortfolioTransactionsEur.where(portfolio_id: id).all
+
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
       eq_percent = nil
-      tr = Matview::PortfolioTransactionsEur.where(fund_id: item.fund_id, fund_type: item.fund_type, portfolio_id: id)
+      tr = trs.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type }
       if tr.any? && !item.current_value.nil?
         eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1)
       end
