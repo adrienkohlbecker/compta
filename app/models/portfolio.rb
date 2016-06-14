@@ -63,21 +63,33 @@ class Portfolio < ActiveRecord::Base
       }
     end
 
-    items.sort do |a, b|
+    items = items.sort do |a, b|
       b[:invested] <=> a[:invested]
     end
-  end
 
-  def print_situation(date = Date.today)
-    items = list_situation(date)
-
-    value = Amount.new(0, 'EUR', Date.today)
+    current_value = Amount.new(0, 'EUR', Date.today)
     items.each do |h|
-      value += h[:value] || 0
+      current_value += h[:value] || 0
     end
 
     invested = invested_at(Date.today)
-    pv = value - invested
+    pv = current_value - invested
+    percent = (current_value / invested - 1).to_f
+    eq_percent = InterestRate.equivalent_rate(trs, current_value, -1, 1)
+
+    {
+      current_value: current_value,
+      invested: invested,
+      pv: pv,
+      percent: percent,
+      eq_percent: eq_percent,
+      items: items
+    }
+  end
+
+  def print_situation(date = Date.today)
+    situation = list_situation(date)
+    items = situation[:items]
 
     items = items.map do |item|
       item[:'#id'] = format('%2s', item[:'#id'])
@@ -92,7 +104,7 @@ class Portfolio < ActiveRecord::Base
     end
 
     puts Hirb::Helpers::AutoTable.render(items)
-    puts "Invested: #{invested} / Current: #{value} / PV: #{pv} / %: #{(value / invested * 100 - 100).round(2)}"
+    puts "Invested: #{situation[:invested]} / Current: #{situation[:current_value]} / PV: #{situation[:pv]} / %: #{(situation[:percent] * 100).round(2)} / eq%: #{(situation[:eq_percent] * 100).round(2)}"
   end
 
   def list_transactions
@@ -169,10 +181,21 @@ class Portfolio < ActiveRecord::Base
     style_shares = wb.styles.add_style format_code: '0.00000;[Red]- 0.00000'
     style_date = wb.styles.add_style format_code: 'dd/mm/yyyy'
 
+    situation = list_situation
+    items = situation[:items]
+
+    wb.add_worksheet(name: 'Overview') do |sheet|
+      sheet.add_row ['Invested', situation[:invested].value], style: [nil, style_currency]
+      sheet.add_row ['Current Value', situation[:current_value].value], style: [nil, style_currency]
+      sheet.add_row ['PV', situation[:pv].value], style: [nil, style_currency]
+      sheet.add_row ['%', situation[:percent]], style: [nil, style_percent]
+      sheet.add_row ['eq%', situation[:eq_percent]], style: [nil, style_percent]
+    end
+
     wb.add_worksheet(name: 'Situation') do |sheet|
       sheet.add_row ['Kind', 'ID', 'Name', 'ISIN', 'Shares', 'Invested', 'Value', 'PV', 'Percent', 'Eq Pct']
 
-      list_situation.each do |item|
+      items.each do |item|
         invested = item[:invested].nil? ? nil : item[:invested].value
         value = item[:value].nil? ? nil : item[:value].value
         pv = item[:pv].nil? ? nil : item[:pv].value
