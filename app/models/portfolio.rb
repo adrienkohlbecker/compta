@@ -44,7 +44,7 @@ class Portfolio < ActiveRecord::Base
       eq_percent = nil
       tr = trs.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type }
       if tr.any? && !item.current_value.nil?
-        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1)
+        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1000)
       end
 
       next if item.invested.nil?
