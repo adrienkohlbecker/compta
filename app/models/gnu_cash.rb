@@ -25,6 +25,25 @@ module GnuCash
       end
     end
 
+    ScpiFund.find_each do |fund|
+      commodity = fund.gnucash_commodity
+      raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
+
+      GnuCash::Base.transaction do
+        Matview::ScpiQuotationsFilledEur.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2014, 01, 01)).where.not(value_original: nil).each do |quotation|
+          date = quotation.date.strftime('%Y%m%d170000')
+          price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
+          price.guid = SecureRandom.hex(16) if price.guid.nil?
+          price.currency_guid = gnucash_currency.guid
+          price.type = 'unknown'
+          value = quotation.value_original.round(6).to_r
+          price.value_num = value.numerator
+          price.value_denom = value.denominator
+          price.save!
+        end
+      end
+    end
+
     Currency.find_each do |currency|
       commodity = currency.gnucash_commodity
       raise "Could not find commodity for currency #{currency.name}" if commodity.nil?
