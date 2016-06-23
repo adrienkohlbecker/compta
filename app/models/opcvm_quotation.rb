@@ -25,6 +25,7 @@ class OpcvmQuotation < ActiveRecord::Base
       raise 'Trying to set value to something other than Amount'
     end
 
+    @_value = amount
     self.value_currency = amount.currency
     self.value_date = amount.at
     self.value_original = amount.value

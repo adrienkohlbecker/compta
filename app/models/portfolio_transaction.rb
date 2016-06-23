@@ -35,6 +35,7 @@ class PortfolioTransaction < ActiveRecord::Base
       raise 'Trying to set amount to something other than Amount'
     end
 
+    @_amount = new_amount
     self.amount_currency = new_amount.currency
     self.amount_date = new_amount.at
     self.amount_original = new_amount.value
@@ -50,6 +51,7 @@ class PortfolioTransaction < ActiveRecord::Base
       raise 'Trying to set shareprice to something other than Amount'
     end
 
+    @_shareprice = new_shareprice
     self.shareprice_currency = new_shareprice.currency
     self.shareprice_date = new_shareprice.at
     self.shareprice_original = new_shareprice.value

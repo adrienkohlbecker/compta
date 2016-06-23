@@ -17,24 +17,6 @@ class Portfolio < ActiveRecord::Base
     'EUR'
   end
 
-  def append_opcvm_transaction(fund_id:, shares:, amount:, date:)
-    transactions.create(
-      fund: OpcvmFund.find(fund_id),
-      shares: shares,
-      amount: Amount.new(amount, currency, date),
-      done_at: date
-    )
-  end
-
-  def append_euro_transaction(fund_id:, amount:, date:)
-    transactions.create(
-      fund: EuroFund.find(fund_id),
-      shares: nil,
-      amount: Amount.new(amount, currency, date),
-      done_at: date
-    )
-  end
-
   def list_situation(date = Date.today)
     items = []
 
