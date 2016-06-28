@@ -13,6 +13,6 @@ class ScpiFund < ActiveRecord::Base
   end
 
   def gnucash_commodity
-    GnuCash::Commodity.where(cusip: name).first
+    GnuCash::Commodity.where(cusip: isin).first
   end
 end
