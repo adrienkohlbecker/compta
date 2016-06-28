@@ -21,6 +21,8 @@ class PortfolioTransaction < ActiveRecord::Base
   belongs_to :fund, polymorphic: true
   belongs_to :portfolio
 
+  CATEGORY_FOR_INVESTED = %w(Virement Arbitrage).freeze
+
   def quotation_when_done
     fund.quotation_at(done_at)
   end

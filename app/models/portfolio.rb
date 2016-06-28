@@ -20,11 +20,11 @@ class Portfolio < ActiveRecord::Base
   def list_situation(date = Date.today)
     items = []
 
-    trs = Matview::PortfolioTransactionsEur.where(portfolio_id: id).all
+    trs_for_rate = Matview::PortfolioTransactionsEur.where(portfolio_id: id, category: PortfolioTransaction::CATEGORY_FOR_INVESTED).all
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
       eq_percent = nil
-      tr = trs.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type }
+      tr = trs_for_rate.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type }
       if tr.any? && !item.current_value.nil?
         eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1000)
       end
@@ -57,7 +57,7 @@ class Portfolio < ActiveRecord::Base
     invested = invested_at(Date.today)
     pv = current_value - invested
     percent = (current_value / invested - 1).to_f
-    eq_percent = InterestRate.equivalent_rate(trs, current_value, -1, 1)
+    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1)
 
     {
       current_value: current_value,
@@ -119,7 +119,7 @@ class Portfolio < ActiveRecord::Base
   end
 
   def invested_at(date)
-    transactions.where(category: %w(Virement Arbitrage)).where('done_at <= ?', date).map { |t| t.amount.to_eur }.reduce(:+) || 0
+    transactions.where(category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where('done_at <= ?', date).map { |t| t.amount.to_eur }.reduce(:+) || 0
   end
 
   def list_performance(start_date = nil)
