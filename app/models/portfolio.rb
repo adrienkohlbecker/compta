@@ -20,7 +20,7 @@ class Portfolio < ActiveRecord::Base
   def list_situation(date = Date.today)
     items = []
 
-    trs_for_rate = Matview::PortfolioTransactionsEur.where(portfolio_id: id, category: PortfolioTransaction::CATEGORY_FOR_INVESTED).all
+    trs_for_rate = Matview::PortfolioTransactionsEur.where(portfolio_id: id, category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where("done_at <= ?", date).all
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
       eq_percent = nil
