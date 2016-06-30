@@ -21,7 +21,7 @@ default: &default
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
   host: db
-  user: postgres
+  username: postgres
   password: <%= ENV['POSTGRES_PASSWORD'] %>
 
 development:
@@ -84,5 +84,3 @@ test:
 production:
   <<: *default
   database: compta_production
-  username: root
-  password:
