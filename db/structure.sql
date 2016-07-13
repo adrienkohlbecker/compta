@@ -1135,17 +1135,10 @@ ALTER TABLE ONLY scpi_quotations
 
 
 --
--- Name: index_currency_quotations_on_date; Type: INDEX; Schema: public; Owner: -
+-- Name: index_currency_quotations_on_id_and_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_currency_quotations_on_date ON currency_quotations USING btree (date);
-
-
---
--- Name: index_currency_quotations_on_name_and_date; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_currency_quotations_on_name_and_date ON currency_quotations USING btree (currency_id, date);
+CREATE INDEX index_currency_quotations_on_id_and_date ON currency_quotations USING btree (currency_id, date);
 
 
 --
@@ -1316,4 +1309,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160713011027');
 INSERT INTO schema_migrations (version) VALUES ('20160713043900');
 
 INSERT INTO schema_migrations (version) VALUES ('20160713043901');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713043902');
 
