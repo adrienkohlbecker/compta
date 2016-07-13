@@ -17,13 +17,9 @@ class Currency < ActiveRecord::Base
   has_one :gnucash_commodity, foreign_key: :mnemonic, primary_key: :name, class_name: 'GnuCash::Commodity'
 
   def refresh_data
-    data = Boursorama::Currency.new(url).export
+    # noop
 
-    self.boursorama_id = data[:boursorama_id]
-    self.name = data[:name]
-    save!
 
-    append_or_refresh_quotation(data[:quotation_date], data[:quotation])
   end
 
   def refresh_quotation_history
