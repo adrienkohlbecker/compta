@@ -601,8 +601,15 @@ CREATE VIEW view_portfolio_euro_fund_history_eur AS
     'EuroFund'::character varying AS fund_type,
     portfolios.id AS portfolio_id,
     NULL::numeric(15,5) AS shares,
-    invested.invested,
-    (((invested.invested + COALESCE(actual_pv.actual_pv, (0)::numeric)) + COALESCE(latent_pv_this_year.latent_pv_this_year, (0)::numeric)) + COALESCE(latent_pv_last_year.latent_pv_last_year, (0)::numeric)) AS current_value
+    (invested.invested)::numeric(15,5) AS invested_original,
+    'EUR'::character varying AS invested_currency,
+    date(date_series.date_series) AS invested_date,
+    ((((invested.invested + COALESCE(actual_pv.actual_pv, (0)::numeric)) + COALESCE(latent_pv_this_year.latent_pv_this_year, (0)::numeric)) + COALESCE(latent_pv_last_year.latent_pv_last_year, (0)::numeric)))::numeric(15,5) AS current_value_original,
+    'EUR'::character varying AS current_value_currency,
+    date(date_series.date_series) AS current_value_date,
+    NULL::numeric(15,5) AS shareprice_original,
+    NULL::character varying AS shareprice_currency,
+    NULL::date AS shareprice_date
    FROM (((((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
            FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
      CROSS JOIN euro_funds)
@@ -622,7 +629,9 @@ CREATE VIEW view_portfolio_euro_fund_history_eur AS
           WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at >= (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))) latent_pv_this_year ON (true))
      LEFT JOIN LATERAL ( SELECT (sum(matview_portfolio_transactions_with_investment_eur.amount_original) * ((((1)::numeric + interest_rate.rate_for_computation) ^ ((((date(date_series.date_series) - (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date) + 1))::numeric / (interest_rate.year_length)::numeric)) - (1)::numeric)) AS latent_pv_last_year
            FROM matview_portfolio_transactions_with_investment_eur
-          WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at < (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date))) latent_pv_last_year ON (true));
+          WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at < (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date))) latent_pv_last_year ON (true))
+  WHERE (invested.invested IS NOT NULL)
+  ORDER BY (date(date_series.date_series)), portfolios.id, euro_funds.id;
 
 
 --
@@ -635,8 +644,15 @@ CREATE MATERIALIZED VIEW matview_portfolio_euro_fund_history_eur AS
     view_portfolio_euro_fund_history_eur.fund_type,
     view_portfolio_euro_fund_history_eur.portfolio_id,
     view_portfolio_euro_fund_history_eur.shares,
-    view_portfolio_euro_fund_history_eur.invested,
-    view_portfolio_euro_fund_history_eur.current_value
+    view_portfolio_euro_fund_history_eur.invested_original,
+    view_portfolio_euro_fund_history_eur.invested_currency,
+    view_portfolio_euro_fund_history_eur.invested_date,
+    view_portfolio_euro_fund_history_eur.current_value_original,
+    view_portfolio_euro_fund_history_eur.current_value_currency,
+    view_portfolio_euro_fund_history_eur.current_value_date,
+    view_portfolio_euro_fund_history_eur.shareprice_original,
+    view_portfolio_euro_fund_history_eur.shareprice_currency,
+    view_portfolio_euro_fund_history_eur.shareprice_date
    FROM view_portfolio_euro_fund_history_eur
   WITH NO DATA;
 
@@ -650,21 +666,29 @@ CREATE VIEW view_portfolio_opcvm_fund_history_eur AS
     opcvm_funds.id AS fund_id,
     'OpcvmFund'::character varying AS fund_type,
     portfolios.id AS portfolio_id,
-    t.shares,
-    t.invested,
-    (matview_opcvm_quotations_filled_eur.value_original * t.shares) AS current_value
+    (t.shares)::numeric(15,5) AS shares,
+    (t.invested)::numeric(15,5) AS invested_original,
+    'EUR'::character varying AS invested_currency,
+    date(date_series.date_series) AS invested_date,
+    ((matview_opcvm_quotations_filled_eur.value_original * t.shares))::numeric(15,5) AS current_value_original,
+    'EUR'::character varying AS current_value_currency,
+    date(date_series.date_series) AS current_value_date,
+    matview_opcvm_quotations_filled_eur.value_original AS shareprice_original,
+    'EUR'::character varying AS shareprice_currency,
+    date(date_series.date_series) AS shareprice_date
    FROM ((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
            FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
      CROSS JOIN opcvm_funds)
      CROSS JOIN portfolios)
-     LEFT JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
+     JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
             matview_portfolio_transactions_with_investment_eur.portfolio_id,
             sum(matview_portfolio_transactions_with_investment_eur.shares) AS shares,
             sum(matview_portfolio_transactions_with_investment_eur.invested_original) AS invested
            FROM matview_portfolio_transactions_with_investment_eur
           WHERE (((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'OpcvmFund'::text) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))
           GROUP BY matview_portfolio_transactions_with_investment_eur.fund_id, matview_portfolio_transactions_with_investment_eur.portfolio_id) t ON (((t.fund_id = opcvm_funds.id) AND (t.portfolio_id = portfolios.id))))
-     JOIN matview_opcvm_quotations_filled_eur ON (((opcvm_funds.id = matview_opcvm_quotations_filled_eur.opcvm_fund_id) AND (matview_opcvm_quotations_filled_eur.date = date(date_series.date_series)))));
+     JOIN matview_opcvm_quotations_filled_eur ON (((opcvm_funds.id = matview_opcvm_quotations_filled_eur.opcvm_fund_id) AND (matview_opcvm_quotations_filled_eur.date = date(date_series.date_series)))))
+  ORDER BY (date(date_series.date_series)), portfolios.id, opcvm_funds.id;
 
 
 --
@@ -677,8 +701,15 @@ CREATE MATERIALIZED VIEW matview_portfolio_opcvm_fund_history_eur AS
     view_portfolio_opcvm_fund_history_eur.fund_type,
     view_portfolio_opcvm_fund_history_eur.portfolio_id,
     view_portfolio_opcvm_fund_history_eur.shares,
-    view_portfolio_opcvm_fund_history_eur.invested,
-    view_portfolio_opcvm_fund_history_eur.current_value
+    view_portfolio_opcvm_fund_history_eur.invested_original,
+    view_portfolio_opcvm_fund_history_eur.invested_currency,
+    view_portfolio_opcvm_fund_history_eur.invested_date,
+    view_portfolio_opcvm_fund_history_eur.current_value_original,
+    view_portfolio_opcvm_fund_history_eur.current_value_currency,
+    view_portfolio_opcvm_fund_history_eur.current_value_date,
+    view_portfolio_opcvm_fund_history_eur.shareprice_original,
+    view_portfolio_opcvm_fund_history_eur.shareprice_currency,
+    view_portfolio_opcvm_fund_history_eur.shareprice_date
    FROM view_portfolio_opcvm_fund_history_eur
   WITH NO DATA;
 
@@ -840,21 +871,29 @@ CREATE VIEW view_portfolio_scpi_fund_history_eur AS
     scpi_funds.id AS fund_id,
     'ScpiFund'::character varying AS fund_type,
     portfolios.id AS portfolio_id,
-    t.shares,
-    t.invested,
-    (matview_scpi_quotations_filled_eur.value_original * t.shares) AS current_value
+    (t.shares)::numeric(15,5) AS shares,
+    (t.invested)::numeric(15,5) AS invested_original,
+    'EUR'::character varying AS invested_currency,
+    date(date_series.date_series) AS invested_date,
+    ((matview_scpi_quotations_filled_eur.value_original * t.shares))::numeric(15,5) AS current_value_original,
+    'EUR'::character varying AS current_value_currency,
+    date(date_series.date_series) AS current_value_date,
+    matview_scpi_quotations_filled_eur.value_original AS shareprice_original,
+    'EUR'::character varying AS shareprice_currency,
+    date(date_series.date_series) AS shareprice_date
    FROM ((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
            FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
      CROSS JOIN scpi_funds)
      CROSS JOIN portfolios)
-     LEFT JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
+     JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
             matview_portfolio_transactions_with_investment_eur.portfolio_id,
             sum(matview_portfolio_transactions_with_investment_eur.shares) AS shares,
             sum(matview_portfolio_transactions_with_investment_eur.invested_original) AS invested
            FROM matview_portfolio_transactions_with_investment_eur
           WHERE (((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'ScpiFund'::text) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))
           GROUP BY matview_portfolio_transactions_with_investment_eur.fund_id, matview_portfolio_transactions_with_investment_eur.portfolio_id) t ON (((t.fund_id = scpi_funds.id) AND (t.portfolio_id = portfolios.id))))
-     JOIN matview_scpi_quotations_filled_eur ON (((scpi_funds.id = matview_scpi_quotations_filled_eur.scpi_fund_id) AND (matview_scpi_quotations_filled_eur.date = date(date_series.date_series)))));
+     JOIN matview_scpi_quotations_filled_eur ON (((scpi_funds.id = matview_scpi_quotations_filled_eur.scpi_fund_id) AND (matview_scpi_quotations_filled_eur.date = date(date_series.date_series)))))
+  ORDER BY (date(date_series.date_series)), portfolios.id, scpi_funds.id;
 
 
 --
@@ -867,8 +906,15 @@ CREATE MATERIALIZED VIEW matview_portfolio_scpi_fund_history_eur AS
     view_portfolio_scpi_fund_history_eur.fund_type,
     view_portfolio_scpi_fund_history_eur.portfolio_id,
     view_portfolio_scpi_fund_history_eur.shares,
-    view_portfolio_scpi_fund_history_eur.invested,
-    view_portfolio_scpi_fund_history_eur.current_value
+    view_portfolio_scpi_fund_history_eur.invested_original,
+    view_portfolio_scpi_fund_history_eur.invested_currency,
+    view_portfolio_scpi_fund_history_eur.invested_date,
+    view_portfolio_scpi_fund_history_eur.current_value_original,
+    view_portfolio_scpi_fund_history_eur.current_value_currency,
+    view_portfolio_scpi_fund_history_eur.current_value_date,
+    view_portfolio_scpi_fund_history_eur.shareprice_original,
+    view_portfolio_scpi_fund_history_eur.shareprice_currency,
+    view_portfolio_scpi_fund_history_eur.shareprice_date
    FROM view_portfolio_scpi_fund_history_eur
   WITH NO DATA;
 
@@ -882,31 +928,73 @@ CREATE VIEW view_portfolio_history AS
     history.fund_id,
     history.fund_type,
     history.portfolio_id,
+    (
         CASE
             WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
             ELSE history.shares
-        END AS shares,
-    history.invested,
+        END)::numeric(15,5) AS shares,
+    history.invested_original,
+    history.invested_currency,
+    history.invested_date,
+    (
         CASE
             WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
-            ELSE history.current_value
-        END AS current_value,
+            ELSE history.current_value_original
+        END)::numeric(15,5) AS current_value_original,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN (- history.invested)
-            ELSE (history.current_value - history.invested)
-        END AS pv,
+            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            ELSE history.current_value_currency
+        END AS current_value_currency,
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            ELSE history.current_value_date
+        END AS current_value_date,
+    (
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN (- history.invested_original)
+            ELSE (history.current_value_original - history.invested_original)
+        END)::numeric(15,5) AS pv_original,
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            ELSE history.current_value_currency
+        END AS pv_currency,
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            ELSE history.current_value_date
+        END AS pv_date,
+    (
         CASE
             WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
-            WHEN (history.invested = (0)::numeric) THEN NULL::numeric
-            ELSE ((history.current_value / history.invested) - (1)::numeric)
-        END AS percent
+            ELSE history.shareprice_original
+        END)::numeric(15,5) AS shareprice_original,
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            ELSE history.shareprice_currency
+        END AS shareprice_currency,
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            ELSE history.shareprice_date
+        END AS shareprice_date,
+    (
+        CASE
+            WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
+            WHEN (history.invested_original = (0)::numeric) THEN NULL::numeric
+            ELSE ((history.current_value_original / history.invested_original) - (1)::numeric)
+        END)::numeric(15,5) AS percent
    FROM ( SELECT matview_portfolio_euro_fund_history_eur.date,
             matview_portfolio_euro_fund_history_eur.fund_id,
             matview_portfolio_euro_fund_history_eur.fund_type,
             matview_portfolio_euro_fund_history_eur.portfolio_id,
             matview_portfolio_euro_fund_history_eur.shares,
-            matview_portfolio_euro_fund_history_eur.invested,
-            matview_portfolio_euro_fund_history_eur.current_value
+            matview_portfolio_euro_fund_history_eur.invested_original,
+            matview_portfolio_euro_fund_history_eur.invested_currency,
+            matview_portfolio_euro_fund_history_eur.invested_date,
+            matview_portfolio_euro_fund_history_eur.current_value_original,
+            matview_portfolio_euro_fund_history_eur.current_value_currency,
+            matview_portfolio_euro_fund_history_eur.current_value_date,
+            matview_portfolio_euro_fund_history_eur.shareprice_original,
+            matview_portfolio_euro_fund_history_eur.shareprice_currency,
+            matview_portfolio_euro_fund_history_eur.shareprice_date
            FROM matview_portfolio_euro_fund_history_eur
         UNION
          SELECT matview_portfolio_opcvm_fund_history_eur.date,
@@ -914,8 +1002,15 @@ CREATE VIEW view_portfolio_history AS
             matview_portfolio_opcvm_fund_history_eur.fund_type,
             matview_portfolio_opcvm_fund_history_eur.portfolio_id,
             matview_portfolio_opcvm_fund_history_eur.shares,
-            matview_portfolio_opcvm_fund_history_eur.invested,
-            matview_portfolio_opcvm_fund_history_eur.current_value
+            matview_portfolio_opcvm_fund_history_eur.invested_original,
+            matview_portfolio_opcvm_fund_history_eur.invested_currency,
+            matview_portfolio_opcvm_fund_history_eur.invested_date,
+            matview_portfolio_opcvm_fund_history_eur.current_value_original,
+            matview_portfolio_opcvm_fund_history_eur.current_value_currency,
+            matview_portfolio_opcvm_fund_history_eur.current_value_date,
+            matview_portfolio_opcvm_fund_history_eur.shareprice_original,
+            matview_portfolio_opcvm_fund_history_eur.shareprice_currency,
+            matview_portfolio_opcvm_fund_history_eur.shareprice_date
            FROM matview_portfolio_opcvm_fund_history_eur
         UNION
          SELECT matview_portfolio_scpi_fund_history_eur.date,
@@ -923,8 +1018,15 @@ CREATE VIEW view_portfolio_history AS
             matview_portfolio_scpi_fund_history_eur.fund_type,
             matview_portfolio_scpi_fund_history_eur.portfolio_id,
             matview_portfolio_scpi_fund_history_eur.shares,
-            matview_portfolio_scpi_fund_history_eur.invested,
-            matview_portfolio_scpi_fund_history_eur.current_value
+            matview_portfolio_scpi_fund_history_eur.invested_original,
+            matview_portfolio_scpi_fund_history_eur.invested_currency,
+            matview_portfolio_scpi_fund_history_eur.invested_date,
+            matview_portfolio_scpi_fund_history_eur.current_value_original,
+            matview_portfolio_scpi_fund_history_eur.current_value_currency,
+            matview_portfolio_scpi_fund_history_eur.current_value_date,
+            matview_portfolio_scpi_fund_history_eur.shareprice_original,
+            matview_portfolio_scpi_fund_history_eur.shareprice_currency,
+            matview_portfolio_scpi_fund_history_eur.shareprice_date
            FROM matview_portfolio_scpi_fund_history_eur) history
   ORDER BY history.date, history.portfolio_id, history.fund_type, history.fund_id;
 
@@ -939,9 +1041,18 @@ CREATE MATERIALIZED VIEW matview_portfolio_history AS
     view_portfolio_history.fund_type,
     view_portfolio_history.portfolio_id,
     view_portfolio_history.shares,
-    view_portfolio_history.invested,
-    view_portfolio_history.current_value,
-    view_portfolio_history.pv,
+    view_portfolio_history.invested_original,
+    view_portfolio_history.invested_currency,
+    view_portfolio_history.invested_date,
+    view_portfolio_history.current_value_original,
+    view_portfolio_history.current_value_currency,
+    view_portfolio_history.current_value_date,
+    view_portfolio_history.pv_original,
+    view_portfolio_history.pv_currency,
+    view_portfolio_history.pv_date,
+    view_portfolio_history.shareprice_original,
+    view_portfolio_history.shareprice_currency,
+    view_portfolio_history.shareprice_date,
     view_portfolio_history.percent
    FROM view_portfolio_history
   WITH NO DATA;
@@ -954,10 +1065,17 @@ CREATE MATERIALIZED VIEW matview_portfolio_history AS
 CREATE VIEW view_portfolio_performance AS
  SELECT matview_portfolio_history.date,
     matview_portfolio_history.portfolio_id,
-    sum(matview_portfolio_history.invested) AS invested,
-    sum(matview_portfolio_history.current_value) AS current_value,
-    sum(matview_portfolio_history.pv) AS pv
+    (sum(matview_portfolio_history.invested_original))::numeric(15,5) AS invested_original,
+    'EUR'::character varying AS invested_currency,
+    matview_portfolio_history.date AS invested_date,
+    (sum(matview_portfolio_history.current_value_original))::numeric(15,5) AS current_value_original,
+    'EUR'::character varying AS current_value_currency,
+    matview_portfolio_history.date AS current_value_date,
+    (sum(matview_portfolio_history.pv_original))::numeric(15,5) AS pv_original,
+    'EUR'::character varying AS pv_currency,
+    matview_portfolio_history.date AS pv_date
    FROM matview_portfolio_history
+  WHERE (matview_portfolio_history.invested_original IS NOT NULL)
   GROUP BY matview_portfolio_history.date, matview_portfolio_history.portfolio_id
   ORDER BY matview_portfolio_history.date, matview_portfolio_history.portfolio_id;
 
@@ -969,9 +1087,15 @@ CREATE VIEW view_portfolio_performance AS
 CREATE MATERIALIZED VIEW matview_portfolio_performance AS
  SELECT view_portfolio_performance.date,
     view_portfolio_performance.portfolio_id,
-    view_portfolio_performance.invested,
-    view_portfolio_performance.current_value,
-    view_portfolio_performance.pv
+    view_portfolio_performance.invested_original,
+    view_portfolio_performance.invested_currency,
+    view_portfolio_performance.invested_date,
+    view_portfolio_performance.current_value_original,
+    view_portfolio_performance.current_value_currency,
+    view_portfolio_performance.current_value_date,
+    view_portfolio_performance.pv_original,
+    view_portfolio_performance.pv_currency,
+    view_portfolio_performance.pv_date
    FROM view_portfolio_performance
   WITH NO DATA;
 
@@ -1456,4 +1580,10 @@ INSERT INTO schema_migrations (version) VALUES ('20160713211002');
 INSERT INTO schema_migrations (version) VALUES ('20160713213012');
 
 INSERT INTO schema_migrations (version) VALUES ('20160713214655');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713220131');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713221510');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713222331');
 
