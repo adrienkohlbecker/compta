@@ -1164,6 +1164,13 @@ CREATE INDEX index_currency_quotations_on_id_and_date ON currency_quotations USI
 
 
 --
+-- Name: index_interest_rates_on_object_type_and_object_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_interest_rates_on_object_type_and_object_id ON interest_rates USING btree (object_type, object_id);
+
+
+--
 -- Name: index_opcvm_quotations_on_date; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1335,4 +1342,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160713043901');
 INSERT INTO schema_migrations (version) VALUES ('20160713043902');
 
 INSERT INTO schema_migrations (version) VALUES ('20160713043903');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713044223');
 
