@@ -240,12 +240,15 @@ class CreateViews < ActiveRecord::Migration
       CREATE VIEW view_scpi_quotations_filled_eur AS
        SELECT matview_scpi_quotations_filled.scpi_fund_id,
           matview_scpi_quotations_filled.date,
-              CASE
+              (CASE
                   WHEN ((matview_scpi_quotations_filled.value_currency)::text = 'EUR'::text) THEN matview_scpi_quotations_filled.value_original
                   ELSE (matview_scpi_quotations_filled.value_original / matview_eur_to_currency.value)
-              END AS value_original,
+              END)::numeric(15,5) AS value_original,
           'EUR'::character varying AS value_currency,
-          matview_scpi_quotations_filled.value_date
+          matview_scpi_quotations_filled.value_date,
+          NULL::numeric(15,5) AS original_value_original,
+          NULL::character varying AS original_value_currency,
+          NULL::date AS original_value_date
          FROM (matview_scpi_quotations_filled
            LEFT JOIN matview_eur_to_currency ON (((matview_scpi_quotations_filled.value_date = matview_eur_to_currency.date) AND ((matview_scpi_quotations_filled.value_currency)::text = (matview_eur_to_currency.currency_name)::text))));
 
