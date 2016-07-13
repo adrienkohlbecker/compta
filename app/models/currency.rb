@@ -18,11 +18,25 @@ class Currency < ActiveRecord::Base
 
   def refresh_data
     # noop
-
-
   end
 
   def refresh_quotation_history
+    bf_id.nil? ? refresh_quotation_history_from_boursorama : refresh_quotation_history_from_bf
+  end
+
+  private def refresh_quotation_history_from_bf
+    transaction do
+      history = BF::QuotationHistory.new(bf_id).quotation_history
+
+      history.each do |date, value|
+        append_or_refresh_quotation(date, value)
+      end
+    end
+
+    nil
+  end
+
+  private def refresh_quotation_history_from_boursorama
     transaction do
       history = Boursorama::QuotationHistory.new(boursorama_id, :weekly).quotation_history
 

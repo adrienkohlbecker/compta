@@ -44,7 +44,7 @@ CREATE TABLE currencies (
     url character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    bf_url character varying
+    bf_id character varying
 );
 
 
@@ -1092,4 +1092,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160622235300');
 INSERT INTO schema_migrations (version) VALUES ('20160629050856');
 
 INSERT INTO schema_migrations (version) VALUES ('20160713004331');
+
+INSERT INTO schema_migrations (version) VALUES ('20160713011027');
 
