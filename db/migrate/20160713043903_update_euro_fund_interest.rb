@@ -13,7 +13,7 @@ class UpdateEuroFundInterest < ActiveRecord::Migration
         	interest_rates.minimal_rate,
         	interest_rates.served_rate,
         	interest_rates.year_length,
-        	COALESCE(interest_rates.served_rate, interest_rates.minimal_rate) * (1 - interest_rates.social_tax_rate) AS rate_for_computation
+        	(COALESCE(interest_rates.served_rate, interest_rates.minimal_rate) * (1 - interest_rates.social_tax_rate))::numeric(15,5) AS rate_for_computation
           FROM interest_rates
           LEFT JOIN t_euro_funds ON t_euro_funds.id = interest_rates.object_id AND interest_rates.object_type = 'EuroFund'
         ),
@@ -23,11 +23,11 @@ class UpdateEuroFundInterest < ActiveRecord::Migration
           UNION (
             SELECT
         	t_interest_rates.euro_fund_id,
-        	(t_interest_rates.from + '1 year'::interval)::date,
-        	(t_interest_rates.to + '1 year'::interval)::date,
+        	(t_interest_rates.from + '1 year'::interval)::date AS from,
+        	(t_interest_rates.to + '1 year'::interval)::date AS to,
         	t_interest_rates.minimal_rate,
         	t_interest_rates.served_rate,
-        	(t_interest_rates.to + '1 year'::interval)::date - (t_interest_rates.from + '1 year'::interval)::date + 1,
+        	(t_interest_rates.to + '1 year'::interval)::date - (t_interest_rates.from + '1 year'::interval)::date + 1 AS year_length,
         	t_interest_rates.rate_for_computation
             FROM t_interest_rates
             JOIN t_euro_funds ON t_interest_rates.euro_fund_id = t_euro_funds.id AND t_interest_rates.to = t_euro_funds.max_to

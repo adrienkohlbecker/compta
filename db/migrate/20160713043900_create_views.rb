@@ -43,7 +43,7 @@ class CreateViews < ActiveRecord::Migration
           t.minimal_rate,
           t.served_rate,
           t.year_length,
-          (COALESCE(t.served_rate, t.minimal_rate) * ((1)::numeric - t.social_tax_rate)) AS rate_for_computation
+          (COALESCE(t.served_rate, t.minimal_rate) * ((1)::numeric - t.social_tax_rate))::numeric(15,5) AS rate_for_computation
          FROM ((generate_series((( SELECT min(interest_rates."from") AS min
                  FROM interest_rates))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
            CROSS JOIN euro_funds)

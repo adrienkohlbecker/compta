@@ -1,5 +1,5 @@
 class AddIndexOnInterestRate < ActiveRecord::Migration
-  def change
+  def up
     execute %(
       CREATE INDEX index_interest_rates_on_object_type_and_object_id
         ON interest_rates

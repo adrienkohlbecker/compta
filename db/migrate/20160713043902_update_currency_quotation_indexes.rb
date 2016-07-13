@@ -1,5 +1,5 @@
 class UpdateCurrencyQuotationIndexes < ActiveRecord::Migration
-  def change
+  def up
     execute 'DROP INDEX index_currency_quotations_on_date;'
     execute 'ALTER INDEX index_currency_quotations_on_name_and_date RENAME TO index_currency_quotations_on_id_and_date;'
   end
