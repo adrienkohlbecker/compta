@@ -114,21 +114,22 @@ class CreateViews < ActiveRecord::Migration
           portfolio_transactions.done_at,
           portfolio_transactions.fund_type,
           portfolio_transactions.category,
-              CASE
+              (CASE
                   WHEN ((portfolio_transactions.amount_currency)::text = 'EUR'::text) THEN portfolio_transactions.amount_original
                   ELSE (portfolio_transactions.amount_original / matview_eur_to_currency_for_amount.value)
-              END AS amount_original,
+              END)::numeric(15,5) AS amount_original,
           'EUR'::character varying AS amount_currency,
           portfolio_transactions.amount_date,
-              CASE
+              (CASE
                   WHEN ((portfolio_transactions.shareprice_currency)::text = 'EUR'::text) THEN portfolio_transactions.shareprice_original
                   ELSE (portfolio_transactions.shareprice_original / matview_eur_to_currency_for_shareprice.value)
-              END AS shareprice_original,
+              END)::numeric(15,5) AS shareprice_original,
           'EUR'::character varying AS shareprice_currency,
           portfolio_transactions.shareprice_date
          FROM ((portfolio_transactions
            LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_amount ON (((portfolio_transactions.amount_date = matview_eur_to_currency_for_amount.date) AND ((portfolio_transactions.amount_currency)::text = (matview_eur_to_currency_for_amount.currency_name)::text))))
-           LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_shareprice ON (((portfolio_transactions.amount_date = matview_eur_to_currency_for_shareprice.date) AND ((portfolio_transactions.amount_currency)::text = (matview_eur_to_currency_for_shareprice.currency_name)::text))));
+           LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_shareprice ON (((portfolio_transactions.amount_date = matview_eur_to_currency_for_shareprice.date) AND ((portfolio_transactions.amount_currency)::text = (matview_eur_to_currency_for_shareprice.currency_name)::text))))
+           ORDER BY portfolio_transactions.done_at, portfolio_transactions.portfolio_id, portfolio_transactions.fund_type, portfolio_transactions.fund_id;
 
       CREATE MATERIALIZED VIEW matview_portfolio_transactions_eur AS SELECT * FROM view_portfolio_transactions_eur;
 
@@ -146,13 +147,14 @@ class CreateViews < ActiveRecord::Migration
           matview_portfolio_transactions_eur.shareprice_original,
           matview_portfolio_transactions_eur.shareprice_currency,
           matview_portfolio_transactions_eur.shareprice_date,
-              CASE
+              (CASE
                   WHEN (((matview_portfolio_transactions_eur.category)::text = 'Virement'::text) OR ((matview_portfolio_transactions_eur.category)::text = 'Arbitrage'::text)) THEN matview_portfolio_transactions_eur.amount_original
                   ELSE (0)::numeric
-              END AS invested_original,
+              END)::numeric(15,5) AS invested_original,
           matview_portfolio_transactions_eur.amount_currency AS invested_currency,
           matview_portfolio_transactions_eur.amount_date AS invested_date
-         FROM matview_portfolio_transactions_eur;
+         FROM matview_portfolio_transactions_eur
+         ORDER BY matview_portfolio_transactions_eur.done_at, matview_portfolio_transactions_eur.portfolio_id, matview_portfolio_transactions_eur.fund_type, matview_portfolio_transactions_eur.fund_id;
 
       CREATE MATERIALIZED VIEW matview_portfolio_transactions_with_investment_eur AS SELECT * FROM view_portfolio_transactions_with_investment_eur;
 
