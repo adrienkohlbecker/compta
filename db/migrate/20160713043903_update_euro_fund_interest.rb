@@ -13,7 +13,7 @@ class UpdateEuroFundInterest < ActiveRecord::Migration
         	interest_rates.minimal_rate,
         	interest_rates.served_rate,
         	interest_rates.year_length,
-        	(COALESCE(interest_rates.served_rate, interest_rates.minimal_rate) * (1 - interest_rates.social_tax_rate))::numeric(15,5) AS rate_for_computation
+        	(COALESCE(interest_rates.served_rate, interest_rates.minimal_rate) * (1 - interest_rates.social_tax_rate))::numeric(15,10) AS rate_for_computation
           FROM interest_rates
           LEFT JOIN t_euro_funds ON t_euro_funds.id = interest_rates.object_id AND interest_rates.object_type = 'EuroFund'
         ),
@@ -55,7 +55,7 @@ class UpdateEuroFundInterest < ActiveRecord::Migration
           t.minimal_rate,
           t.served_rate,
           t.year_length,
-          (COALESCE(t.served_rate, t.minimal_rate) * (1::numeric - t.social_tax_rate))::numeric(15,5) AS rate_for_computation
+          (COALESCE(t.served_rate, t.minimal_rate) * (1::numeric - t.social_tax_rate))::numeric(15,10) AS rate_for_computation
          FROM generate_series((( SELECT min(interest_rates."from") AS min
                  FROM interest_rates))::timestamp without time zone, transaction_timestamp()::date + '30 days'::interval, '1 day'::interval) date_series(date_series)
            CROSS JOIN euro_funds

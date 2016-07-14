@@ -20,7 +20,7 @@ class Portfolio < ActiveRecord::Base
   def list_situation(date = Date.today)
     items = []
 
-    trs_for_rate = Matview::PortfolioTransactionsEur.where(portfolio_id: id, category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where("done_at <= ?", date).all
+    trs_for_rate = Matview::PortfolioTransactionsWithInvestmentEur.where(portfolio_id: id, category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where("done_at <= ?", date).all
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: id).includes(:fund).each do |item|
       eq_percent = nil
@@ -37,6 +37,7 @@ class Portfolio < ActiveRecord::Base
         name: item.fund.name,
         isin: item.fund.try(:isin),
         shares: item.shares,
+        shareprice: item.shareprice,
         invested: item.invested,
         value: item.current_value,
         pv: item.pv,
@@ -49,12 +50,12 @@ class Portfolio < ActiveRecord::Base
       b[:invested] <=> a[:invested]
     end
 
-    current_value = Amount.new(0, 'EUR', Date.today)
+    current_value = Amount.new(0, 'EUR', date)
     items.each do |h|
       current_value += h[:value] || 0
     end
 
-    invested = invested_at(Date.today)
+    invested = invested_at(date)
     pv = current_value - invested
     percent = (current_value / invested - 1).to_f
     eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1)
@@ -76,6 +77,7 @@ class Portfolio < ActiveRecord::Base
     items = items.map do |item|
       item[:'#id'] = format('%2s', item[:'#id'])
       item[:shares] = format('%8s', format('%.5f', item[:shares].round(5))) unless item[:shares].nil?
+      item[:shareprice] = format('%11s', item[:shareprice])
       item[:'%'] = format('%6s', format('%.2f', (item[:'%'] * 100).round(2))) unless item[:'%'].nil?
       item[:'eq%'] = format('%6s', format('%.2f', (item[:'eq%'] * 100).round(2))) unless item[:'eq%'].nil?
       item[:invested] = format('%11s', item[:invested])
@@ -175,15 +177,16 @@ class Portfolio < ActiveRecord::Base
     end
 
     wb.add_worksheet(name: 'Situation') do |sheet|
-      sheet.add_row ['Kind', 'ID', 'Name', 'ISIN', 'Shares', 'Invested', 'Value', 'PV', 'Percent', 'Eq Pct']
+      sheet.add_row ['Kind', 'ID', 'Name', 'ISIN', 'Shares', 'Shareprice', 'Invested', 'Value', 'PV', 'Percent', 'Eq Pct']
 
       items.each do |item|
         invested = item[:invested].nil? ? nil : item[:invested].value
+        shareprice = item[:shareprice].nil? ? nil : item[:shareprice].value
         value = item[:value].nil? ? nil : item[:value].value
         pv = item[:pv].nil? ? nil : item[:pv].value
 
-        sheet.add_row [item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], invested, value, pv, item[:'%'], item[:'eq%']],
-                      style: [nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_percent, style_percent]
+        sheet.add_row [item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], shareprice, invested, value, pv, item[:'%'], item[:'eq%']],
+                      style: [nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_currency, style_percent, style_percent]
       end
 
       sheet.auto_filter = 'A1:C1'

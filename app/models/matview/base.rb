@@ -5,11 +5,10 @@ class Matview::Base < ActiveRecord::Base
 
   def self.refresh_all
     connection.execute 'REFRESH MATERIALIZED VIEW matview_eur_to_currency;'
-    connection.execute 'REFRESH MATERIALIZED VIEW matview_opcvm_quotations_filled;'
+    connection.execute 'REFRESH MATERIALIZED VIEW matview_opcvm_quotations_eur;'
     connection.execute 'REFRESH MATERIALIZED VIEW matview_opcvm_quotations_filled_eur;'
-    connection.execute 'REFRESH MATERIALIZED VIEW matview_scpi_quotations_filled;'
+    connection.execute 'REFRESH MATERIALIZED VIEW matview_scpi_quotations_eur;'
     connection.execute 'REFRESH MATERIALIZED VIEW matview_scpi_quotations_filled_eur;'
-    connection.execute 'REFRESH MATERIALIZED VIEW matview_portfolio_transactions_eur;'
     connection.execute 'REFRESH MATERIALIZED VIEW matview_portfolio_transactions_with_investment_eur;'
     connection.execute 'REFRESH MATERIALIZED VIEW matview_euro_fund_interest_filled;'
     connection.execute 'REFRESH MATERIALIZED VIEW matview_portfolio_euro_fund_history_eur;'
