@@ -34,7 +34,7 @@ class Boursorama::Fund
   end
 
   def isin
-    doc.css('.fv-isin').first.content.split('-').first.strip.split(/\s/)[0]
+    doc.css('.fv-isin').first.content.match(/.* ([a-zA-Z]{2}[0-9a-zA-Z]{10}) .*/)[1]
   end
 
   def quotation
