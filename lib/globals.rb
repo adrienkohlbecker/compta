@@ -15,6 +15,7 @@ end
 def excel_export!(path)
   Portfolio.all.map do |portfolio|
     ap portfolio.name
-    portfolio.excel(path)
+    Formatter.new(portfolio).excel("#{path}/#{portfolio.name}.xlsx")
   end
+  Formatter.new(Portfolio.all.pluck(:id)).excel("#{path}/Global.xlsx")
 end
