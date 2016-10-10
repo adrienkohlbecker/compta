@@ -16,7 +16,7 @@ services:
       - redis
 
   postgres:
-    image: kohlby/postgres
+    image: kohlby/postgres:9.5
     environment:
       POSTGRES_ENABLE_SSL: 'yes'
       POSTGRES_PASSWORD: mysecretpassword
