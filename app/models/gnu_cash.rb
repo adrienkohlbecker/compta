@@ -4,7 +4,7 @@ module GnuCash
     GnuCash::Base.connection.execute('CREATE INDEX IF NOT EXISTS compta_index_prices ON prices (date, commodity_guid, source)')
     GnuCash::Price.where.not(source: 'user:price-editor').delete_all
 
-    gnucash_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
+    eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
 
     OpcvmFund.find_each do |fund|
       commodity = fund.gnucash_commodity
@@ -15,7 +15,7 @@ module GnuCash
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
-          price.currency_guid = gnucash_currency.guid
+          price.currency_guid = eur_currency.guid
           price.type = 'unknown'
           value = quotation.value_original.round(6).to_r
           price.value_num = value.numerator
@@ -34,7 +34,7 @@ module GnuCash
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
-          price.currency_guid = gnucash_currency.guid
+          price.currency_guid = eur_currency.guid
           price.type = 'unknown'
           value = quotation.value_original.round(6).to_r
           price.value_num = value.numerator
@@ -53,7 +53,7 @@ module GnuCash
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
-          price.currency_guid = gnucash_currency.guid
+          price.currency_guid = eur_currency.guid
           price.type = 'unknown'
           # gnucash stores the currencies in reverse
           value = (1 / quotation.value).round(6).to_r
