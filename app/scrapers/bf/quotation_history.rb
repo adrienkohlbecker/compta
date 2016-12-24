@@ -36,7 +36,7 @@ class BF::QuotationHistory
 
     csv.each_with_object({}) do |i, a|
       next if i[index] == 'N/A'
-      a[Date.parse(i[0])] = i[1]
+      a[Date.parse(i[0])] = i[index]
     end
   end
 
