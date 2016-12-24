@@ -5,8 +5,9 @@ class BF::QuotationHistory
   VERSION = 1
 
   def initialize(symbol)
-    @uri = "https://www.banque-france.fr/fileadmin/user_upload/banque_de_france/Economie_et_Statistiques/Changes_et_Taux/uc.d.#{symbol}.eur.sp00.a.csv"
-    @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
+    @uri = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip'
+    @http = HTTPCache.new(@uri, key: :ecb, expires_in: 3600 * 24)
+    @symbol = symbol
   end
 
   def cached?
@@ -30,10 +31,12 @@ class BF::QuotationHistory
   end
 
   def quotation_history
-    8.times { csv.shift } # skip header
+    header = csv.first
+    index = header.index(@symbol)
+
     csv.each_with_object({}) do |i, a|
-      next if i[1] == 'ND'
-      a[Date.parse(i[0])] = i[1].sub(',', '.')
+      next if i[index] == 'N/A'
+      a[Date.parse(i[0])] = i[1]
     end
   end
 
@@ -46,10 +49,19 @@ class BF::QuotationHistory
   end
 
   private def fetch_csv
-    CSV.new(doc, col_sep: ';', row_sep: "\r\n")
+    CSV.new(doc, col_sep: ',', row_sep: "\n")
   end
 
   private def fetch_document
-    @http.get.encode('UTF-8', 'ISO-8859-1')
+    tmp = Tempfile.new('ecb')
+    tmp.binmode
+    tmp.write(@http.get)
+    zip = Zip::File.open(tmp.path)
+    entry = zip.get_entry('eurofxref-hist.csv')
+    doc = entry.get_input_stream.read
+    zip.close
+    tmp.close
+    tmp.unlink
+    doc
   end
 end
