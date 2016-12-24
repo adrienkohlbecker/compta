@@ -6,15 +6,15 @@ module GnuCash
 
     eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
 
-    # CUC change from Cuba trip (1 EUR = 1,02160087 CUC)
+    # CUC change from Cuba trip (1 EUR = 1.02227786 CUC => 1 CUC = O.97820762 EUR)
     cuc_currency = GnuCash::Commodity.where(mnemonic: 'CUC').first
     p = GnuCash::Price.where(commodity: cuc_currency.guid, currency_guid: eur_currency.guid, date: "20161204170000", source: "user:price-editor").first_or_initialize(type: 'unknown', guid: SecureRandom.hex(16))
-    p.update_attributes!(value_num: 102160087, value_denom: 100000000)
+    p.update_attributes!(value_num: 97820762, value_denom: 100000000)
 
-    # CUP change from Cuba trip (1 CUC = 24 CUP => 1 EUR = 0.04078566 CUP)
+    # CUP change from Cuba trip (1 CUC = 24 CUP => 1 CUP = 0.04075865 EUR)
     cup_currency = GnuCash::Commodity.where(mnemonic: 'CUP').first
     p = GnuCash::Price.where(commodity: cup_currency.guid, currency_guid: eur_currency.guid, date: "20161204170000", source: "user:price-editor").first_or_initialize(type: 'unknown', guid: SecureRandom.hex(16))
-    p.update_attributes!(value_num: 4078566, value_denom: 100000000)
+    p.update_attributes!(value_num: 4075865, value_denom: 100000000)
 
     OpcvmFund.find_each do |fund|
       commodity = fund.gnucash_commodity
