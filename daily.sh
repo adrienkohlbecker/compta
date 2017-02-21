@@ -26,10 +26,8 @@ echo "stopping Dropbox"
 killall Dropbox
 
 echo "Starting database..."
-/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml create db
-/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml start db
-/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml create redis
-/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml start redis
+/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml up -d db
+/usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml up -d redis
 sleep 20
 
 echo "Running daily task..."

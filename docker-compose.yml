@@ -1,7 +1,5 @@
 ---
-version: "2"
-networks:
-  default:
+version: "3"
 services:
   main:
     build: .
@@ -13,16 +11,12 @@ services:
       - ~/.pry_history:/root/.pry_history
     environment:
       POSTGRES_PASSWORD: mysecretpassword
-    networks:
-      - default
     links:
       - db
       - redis
 
-  postgres:
+  postgres: &POSTGRES
     image: akohlbecker/postgres:9.5
-    networks:
-      - default
     environment:
       POSTGRES_ENABLE_SSL: 'yes'
       POSTGRES_PASSWORD: mysecretpassword
@@ -31,18 +25,16 @@ services:
 
   redis:
     image: redis:3.2-alpine
-    networks:
-      - default
 
   db:
-    extends: postgres
+    <<: *POSTGRES
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - "65432:5432"
 
   psql:
-    extends: postgres
+    <<: *POSTGRES
     entrypoint: psql --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
@@ -51,7 +43,7 @@ services:
       - db
 
   pg_dump:
-    extends: postgres
+    <<: *POSTGRES
     entrypoint: pg_dump --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
@@ -60,7 +52,7 @@ services:
       - db
 
   pg_restore:
-    extends: postgres
+    <<: *POSTGRES
     entrypoint: pg_restore --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
