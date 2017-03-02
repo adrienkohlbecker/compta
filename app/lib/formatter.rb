@@ -105,7 +105,7 @@ class Formatter
   def print_transactions
     items = list_transactions
     items = items.map do |item|
-      item[:shares] = format('%.4f', item[:shares]) unless item[:shares].nil?
+      item[:shares] = format('%.5f', item[:shares]) unless item[:shares].nil?
       item
     end
 
