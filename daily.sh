@@ -7,9 +7,6 @@ IFS=$'\n\t'
 
 function finish {
 
-  echo "Starting dropbox..."
-  open -a Dropbox
-
   echo "Stopping database..."
   /usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml stop db
   /usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml stop redis
@@ -21,9 +18,6 @@ trap finish EXIT
 echo "==================="
 date
 echo ""
-
-echo "stopping Dropbox"
-killall Dropbox
 
 echo "Starting database..."
 /usr/local/bin/docker-compose --file=/Users/ak/Desktop/compta/docker-compose.yml up -d db
