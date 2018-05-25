@@ -5,8 +5,8 @@ services:
     build: .
     volumes:
       - .:/app/compta
-      - ~/Google Drive/Applications/Compta:/dropbox
-      - ~/Google Drive/Applications/Gnucash:/gnucash
+      - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Compta:/dropbox
+      - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Gnucash:/gnucash
       - ~/.pryrc:/root/.pryrc
       - ~/.pry_history:/root/.pry_history
     environment:
@@ -38,7 +38,7 @@ services:
     entrypoint: psql --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
-      - ~/Google Drive/Applications/Compta:/dropbox
+      - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Compta:/dropbox
     links:
       - db
 
@@ -47,7 +47,7 @@ services:
     entrypoint: pg_dump --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
-      - ~/Google Drive/Applications/Compta:/dropbox
+      - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Compta:/dropbox
     links:
       - db
 
@@ -56,6 +56,6 @@ services:
     entrypoint: pg_restore --host=db --port=5432 --username=postgres --dbname=compta_development
     volumes:
       - .:/app/compta
-      - ~/Google Drive/Applications/Compta:/dropbox
+      - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Compta:/dropbox
     links:
       - db
