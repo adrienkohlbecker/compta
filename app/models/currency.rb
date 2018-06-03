@@ -38,13 +38,7 @@ class Currency < ActiveRecord::Base
 
   private def refresh_quotation_history_from_boursorama
     transaction do
-      history = Boursorama::QuotationHistory.new(boursorama_id, :weekly).quotation_history
-
-      history.each do |date, value|
-        append_or_refresh_quotation(date, value)
-      end
-
-      history = Boursorama::QuotationHistory.new(boursorama_id, :daily).quotation_history
+      history = Boursorama::QuotationHistory.new(boursorama_id).quotation_history
 
       history.each do |date, value|
         append_or_refresh_quotation(date, value)

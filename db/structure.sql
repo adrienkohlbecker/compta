@@ -2,13 +2,14 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.3
--- Dumped by pg_dump version 9.5.3
+-- Dumped from database version 9.5.12
+-- Dumped by pg_dump version 9.5.13
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
@@ -27,8 +28,6 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
-SET search_path = public, pg_catalog;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -37,7 +36,7 @@ SET default_with_oids = false;
 -- Name: currencies; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE currencies (
+CREATE TABLE public.currencies (
     id integer NOT NULL,
     name character varying,
     boursorama_id character varying,
@@ -52,7 +51,7 @@ CREATE TABLE currencies (
 -- Name: currencies_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE currencies_id_seq
+CREATE SEQUENCE public.currencies_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -64,14 +63,14 @@ CREATE SEQUENCE currencies_id_seq
 -- Name: currencies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE currencies_id_seq OWNED BY currencies.id;
+ALTER SEQUENCE public.currencies_id_seq OWNED BY public.currencies.id;
 
 
 --
 -- Name: currency_quotations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE currency_quotations (
+CREATE TABLE public.currency_quotations (
     id integer NOT NULL,
     currency_id integer,
     date date,
@@ -85,7 +84,7 @@ CREATE TABLE currency_quotations (
 -- Name: currency_cotations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE currency_cotations_id_seq
+CREATE SEQUENCE public.currency_cotations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -97,14 +96,14 @@ CREATE SEQUENCE currency_cotations_id_seq
 -- Name: currency_cotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE currency_cotations_id_seq OWNED BY currency_quotations.id;
+ALTER SEQUENCE public.currency_cotations_id_seq OWNED BY public.currency_quotations.id;
 
 
 --
 -- Name: euro_funds; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE euro_funds (
+CREATE TABLE public.euro_funds (
     id integer NOT NULL,
     name character varying,
     currency character varying,
@@ -117,7 +116,7 @@ CREATE TABLE euro_funds (
 -- Name: euro_funds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE euro_funds_id_seq
+CREATE SEQUENCE public.euro_funds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -129,14 +128,14 @@ CREATE SEQUENCE euro_funds_id_seq
 -- Name: euro_funds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE euro_funds_id_seq OWNED BY euro_funds.id;
+ALTER SEQUENCE public.euro_funds_id_seq OWNED BY public.euro_funds.id;
 
 
 --
 -- Name: opcvm_quotations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE opcvm_quotations (
+CREATE TABLE public.opcvm_quotations (
     id integer NOT NULL,
     opcvm_fund_id integer,
     value_original numeric(15,5),
@@ -152,7 +151,7 @@ CREATE TABLE opcvm_quotations (
 -- Name: fund_cotations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE fund_cotations_id_seq
+CREATE SEQUENCE public.fund_cotations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -164,14 +163,14 @@ CREATE SEQUENCE fund_cotations_id_seq
 -- Name: fund_cotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE fund_cotations_id_seq OWNED BY opcvm_quotations.id;
+ALTER SEQUENCE public.fund_cotations_id_seq OWNED BY public.opcvm_quotations.id;
 
 
 --
 -- Name: interest_rates; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE interest_rates (
+CREATE TABLE public.interest_rates (
     id integer NOT NULL,
     object_id integer,
     object_type character varying,
@@ -190,7 +189,7 @@ CREATE TABLE interest_rates (
 -- Name: interest_rates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE interest_rates_id_seq
+CREATE SEQUENCE public.interest_rates_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -202,21 +201,21 @@ CREATE SEQUENCE interest_rates_id_seq
 -- Name: interest_rates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE interest_rates_id_seq OWNED BY interest_rates.id;
+ALTER SEQUENCE public.interest_rates_id_seq OWNED BY public.interest_rates.id;
 
 
 --
 -- Name: view_eur_to_currency; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_eur_to_currency AS
+CREATE VIEW public.view_eur_to_currency AS
  WITH t_currencies_tmp AS (
          SELECT currencies.id,
             currencies.name,
             min(currency_quotations.date) AS min,
             max(currency_quotations.date) AS max
-           FROM (currencies
-             JOIN currency_quotations ON ((currency_quotations.currency_id = currencies.id)))
+           FROM (public.currencies
+             JOIN public.currency_quotations ON ((currency_quotations.currency_id = currencies.id)))
           GROUP BY currencies.id, currencies.name
         ), t_currencies AS (
          SELECT t_currencies_tmp.id,
@@ -225,7 +224,7 @@ CREATE VIEW view_eur_to_currency AS
             t_currencies_tmp.max,
             currency_quotations.value AS value_at_max_date
            FROM (t_currencies_tmp
-             JOIN currency_quotations ON ((currency_quotations.currency_id = t_currencies_tmp.id)))
+             JOIN public.currency_quotations ON ((currency_quotations.currency_id = t_currencies_tmp.id)))
           WHERE (currency_quotations.date = t_currencies_tmp.max)
         )
  SELECT t_currencies.id AS currency_id,
@@ -235,7 +234,7 @@ CREATE VIEW view_eur_to_currency AS
    FROM ((t_currencies
      CROSS JOIN LATERAL generate_series((t_currencies.min)::timestamp with time zone, (t_currencies.max)::timestamp with time zone, '1 day'::interval) date_series(date_series))
      JOIN LATERAL ( SELECT currency_quotations.value
-           FROM currency_quotations
+           FROM public.currency_quotations
           WHERE ((currency_quotations.currency_id = t_currencies.id) AND (currency_quotations.date >= date_series.date_series))
           ORDER BY currency_quotations.date
          LIMIT 1) t_values ON (true))
@@ -253,12 +252,12 @@ UNION
 -- Name: matview_eur_to_currency; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_eur_to_currency AS
+CREATE MATERIALIZED VIEW public.matview_eur_to_currency AS
  SELECT view_eur_to_currency.currency_id,
     view_eur_to_currency.currency_name,
     view_eur_to_currency.date,
     view_eur_to_currency.value
-   FROM view_eur_to_currency
+   FROM public.view_eur_to_currency
   WITH NO DATA;
 
 
@@ -266,12 +265,12 @@ CREATE MATERIALIZED VIEW matview_eur_to_currency AS
 -- Name: view_euro_fund_interest_filled; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_euro_fund_interest_filled AS
+CREATE VIEW public.view_euro_fund_interest_filled AS
  WITH t_euro_funds AS (
          SELECT euro_funds.id,
             max(interest_rates."to") AS max_to
-           FROM (euro_funds
-             JOIN interest_rates ON (((interest_rates.object_id = euro_funds.id) AND ((interest_rates.object_type)::text = 'EuroFund'::text))))
+           FROM (public.euro_funds
+             JOIN public.interest_rates ON (((interest_rates.object_id = euro_funds.id) AND ((interest_rates.object_type)::text = 'EuroFund'::text))))
           GROUP BY euro_funds.id
         ), t_interest_rates AS (
          SELECT t_euro_funds.id AS euro_fund_id,
@@ -281,7 +280,7 @@ CREATE VIEW view_euro_fund_interest_filled AS
             interest_rates.served_rate,
             interest_rates.year_length,
             ((COALESCE(interest_rates.served_rate, interest_rates.minimal_rate) * ((1)::numeric - interest_rates.social_tax_rate)))::numeric(15,10) AS rate_for_computation
-           FROM (interest_rates
+           FROM (public.interest_rates
              LEFT JOIN t_euro_funds ON (((t_euro_funds.id = interest_rates.object_id) AND ((interest_rates.object_type)::text = 'EuroFund'::text))))
         ), t_interest_rates_filled AS (
          SELECT t_interest_rates.euro_fund_id,
@@ -319,14 +318,14 @@ CREATE VIEW view_euro_fund_interest_filled AS
 -- Name: matview_euro_fund_interest_filled; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_euro_fund_interest_filled AS
+CREATE MATERIALIZED VIEW public.matview_euro_fund_interest_filled AS
  SELECT view_euro_fund_interest_filled.euro_fund_id,
     view_euro_fund_interest_filled.date,
     view_euro_fund_interest_filled.minimal_rate,
     view_euro_fund_interest_filled.served_rate,
     view_euro_fund_interest_filled.year_length,
     view_euro_fund_interest_filled.rate_for_computation
-   FROM view_euro_fund_interest_filled
+   FROM public.view_euro_fund_interest_filled
   WITH NO DATA;
 
 
@@ -334,7 +333,7 @@ CREATE MATERIALIZED VIEW matview_euro_fund_interest_filled AS
 -- Name: view_opcvm_quotations_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_opcvm_quotations_eur AS
+CREATE VIEW public.view_opcvm_quotations_eur AS
  SELECT opcvm_quotations.opcvm_fund_id,
     opcvm_quotations.date,
     (
@@ -356,8 +355,8 @@ CREATE VIEW view_opcvm_quotations_eur AS
             WHEN ((opcvm_quotations.value_currency)::text = 'EUR'::text) THEN NULL::date
             ELSE opcvm_quotations.value_date
         END AS original_value_date
-   FROM (opcvm_quotations
-     LEFT JOIN matview_eur_to_currency ON (((opcvm_quotations.value_date = matview_eur_to_currency.date) AND ((opcvm_quotations.value_currency)::text = (matview_eur_to_currency.currency_name)::text))))
+   FROM (public.opcvm_quotations
+     LEFT JOIN public.matview_eur_to_currency ON (((opcvm_quotations.value_date = matview_eur_to_currency.date) AND ((opcvm_quotations.value_currency)::text = (matview_eur_to_currency.currency_name)::text))))
   ORDER BY opcvm_quotations.opcvm_fund_id, opcvm_quotations.date;
 
 
@@ -365,7 +364,7 @@ CREATE VIEW view_opcvm_quotations_eur AS
 -- Name: matview_opcvm_quotations_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_opcvm_quotations_eur AS
+CREATE MATERIALIZED VIEW public.matview_opcvm_quotations_eur AS
  SELECT view_opcvm_quotations_eur.opcvm_fund_id,
     view_opcvm_quotations_eur.date,
     view_opcvm_quotations_eur.value_original,
@@ -374,7 +373,7 @@ CREATE MATERIALIZED VIEW matview_opcvm_quotations_eur AS
     view_opcvm_quotations_eur.original_value_original,
     view_opcvm_quotations_eur.original_value_currency,
     view_opcvm_quotations_eur.original_value_date
-   FROM view_opcvm_quotations_eur
+   FROM public.view_opcvm_quotations_eur
   WITH NO DATA;
 
 
@@ -382,7 +381,7 @@ CREATE MATERIALIZED VIEW matview_opcvm_quotations_eur AS
 -- Name: opcvm_funds; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE opcvm_funds (
+CREATE TABLE public.opcvm_funds (
     id integer NOT NULL,
     isin character varying,
     name character varying,
@@ -391,7 +390,8 @@ CREATE TABLE opcvm_funds (
     updated_at timestamp without time zone NOT NULL,
     currency character varying,
     closed boolean DEFAULT false NOT NULL,
-    closed_date date
+    closed_date date,
+    boursorama_type character varying
 );
 
 
@@ -399,13 +399,13 @@ CREATE TABLE opcvm_funds (
 -- Name: view_opcvm_quotations_filled_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_opcvm_quotations_filled_eur AS
+CREATE VIEW public.view_opcvm_quotations_filled_eur AS
  WITH t_opcvm_funds AS (
          SELECT opcvm_funds.id,
             min(matview_opcvm_quotations_eur.date) AS min_quotation,
             max(matview_opcvm_quotations_eur.date) AS max_quotation
-           FROM (opcvm_funds
-             JOIN matview_opcvm_quotations_eur ON ((matview_opcvm_quotations_eur.opcvm_fund_id = opcvm_funds.id)))
+           FROM (public.opcvm_funds
+             JOIN public.matview_opcvm_quotations_eur ON ((matview_opcvm_quotations_eur.opcvm_fund_id = opcvm_funds.id)))
           GROUP BY opcvm_funds.id
         )
  SELECT t_opcvm_funds.id AS opcvm_fund_id,
@@ -426,7 +426,7 @@ CREATE VIEW view_opcvm_quotations_filled_eur AS
             matview_opcvm_quotations_eur.original_value_original,
             matview_opcvm_quotations_eur.original_value_currency,
             matview_opcvm_quotations_eur.original_value_date
-           FROM matview_opcvm_quotations_eur
+           FROM public.matview_opcvm_quotations_eur
           WHERE ((matview_opcvm_quotations_eur.opcvm_fund_id = t_opcvm_funds.id) AND (matview_opcvm_quotations_eur.date >= date_series.date_series))
           ORDER BY matview_opcvm_quotations_eur.date
          LIMIT 1) t_values ON (true))
@@ -441,7 +441,7 @@ UNION
     t_values.original_value_date
    FROM ((t_opcvm_funds
      CROSS JOIN LATERAL generate_series((t_opcvm_funds.max_quotation + '1 day'::interval), ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series))
-     LEFT JOIN matview_opcvm_quotations_eur t_values ON (((t_values.opcvm_fund_id = t_opcvm_funds.id) AND (t_values.date = t_opcvm_funds.max_quotation))))
+     LEFT JOIN public.matview_opcvm_quotations_eur t_values ON (((t_values.opcvm_fund_id = t_opcvm_funds.id) AND (t_values.date = t_opcvm_funds.max_quotation))))
   ORDER BY 1, 2;
 
 
@@ -449,7 +449,7 @@ UNION
 -- Name: matview_opcvm_quotations_filled_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_opcvm_quotations_filled_eur AS
+CREATE MATERIALIZED VIEW public.matview_opcvm_quotations_filled_eur AS
  SELECT view_opcvm_quotations_filled_eur.opcvm_fund_id,
     view_opcvm_quotations_filled_eur.date,
     view_opcvm_quotations_filled_eur.value_original,
@@ -458,7 +458,7 @@ CREATE MATERIALIZED VIEW matview_opcvm_quotations_filled_eur AS
     view_opcvm_quotations_filled_eur.original_value_original,
     view_opcvm_quotations_filled_eur.original_value_currency,
     view_opcvm_quotations_filled_eur.original_value_date
-   FROM view_opcvm_quotations_filled_eur
+   FROM public.view_opcvm_quotations_filled_eur
   WITH NO DATA;
 
 
@@ -466,7 +466,7 @@ CREATE MATERIALIZED VIEW matview_opcvm_quotations_filled_eur AS
 -- Name: portfolio_transactions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE portfolio_transactions (
+CREATE TABLE public.portfolio_transactions (
     id integer NOT NULL,
     fund_id integer,
     shares numeric(15,5),
@@ -489,7 +489,7 @@ CREATE TABLE portfolio_transactions (
 -- Name: view_portfolio_transactions_with_investment; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_transactions_with_investment AS
+CREATE VIEW public.view_portfolio_transactions_with_investment AS
  SELECT portfolio_transactions.id,
     portfolio_transactions.fund_id,
     portfolio_transactions.shares,
@@ -510,7 +510,7 @@ CREATE VIEW view_portfolio_transactions_with_investment AS
         END)::numeric(15,5) AS invested_original,
     portfolio_transactions.amount_currency AS invested_currency,
     portfolio_transactions.amount_date AS invested_date
-   FROM portfolio_transactions
+   FROM public.portfolio_transactions
   ORDER BY portfolio_transactions.done_at, portfolio_transactions.portfolio_id, portfolio_transactions.fund_type, portfolio_transactions.fund_id;
 
 
@@ -518,7 +518,7 @@ CREATE VIEW view_portfolio_transactions_with_investment AS
 -- Name: view_portfolio_transactions_with_investment_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_transactions_with_investment_eur AS
+CREATE VIEW public.view_portfolio_transactions_with_investment_eur AS
  SELECT view_portfolio_transactions_with_investment.id,
     view_portfolio_transactions_with_investment.fund_id,
     view_portfolio_transactions_with_investment.shares,
@@ -547,10 +547,10 @@ CREATE VIEW view_portfolio_transactions_with_investment_eur AS
         END)::numeric(15,5) AS invested_original,
     'EUR'::character varying AS invested_currency,
     view_portfolio_transactions_with_investment.invested_date
-   FROM (((view_portfolio_transactions_with_investment
-     LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_amount ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_amount.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_amount.currency_name)::text))))
-     LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_shareprice ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_shareprice.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_shareprice.currency_name)::text))))
-     LEFT JOIN matview_eur_to_currency matview_eur_to_currency_for_invested ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_invested.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_invested.currency_name)::text))))
+   FROM (((public.view_portfolio_transactions_with_investment
+     LEFT JOIN public.matview_eur_to_currency matview_eur_to_currency_for_amount ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_amount.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_amount.currency_name)::text))))
+     LEFT JOIN public.matview_eur_to_currency matview_eur_to_currency_for_shareprice ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_shareprice.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_shareprice.currency_name)::text))))
+     LEFT JOIN public.matview_eur_to_currency matview_eur_to_currency_for_invested ON (((view_portfolio_transactions_with_investment.amount_date = matview_eur_to_currency_for_invested.date) AND ((view_portfolio_transactions_with_investment.amount_currency)::text = (matview_eur_to_currency_for_invested.currency_name)::text))))
   ORDER BY view_portfolio_transactions_with_investment.done_at, view_portfolio_transactions_with_investment.portfolio_id, view_portfolio_transactions_with_investment.fund_type, view_portfolio_transactions_with_investment.fund_id;
 
 
@@ -558,7 +558,7 @@ CREATE VIEW view_portfolio_transactions_with_investment_eur AS
 -- Name: matview_portfolio_transactions_with_investment_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_transactions_with_investment_eur AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_transactions_with_investment_eur AS
  SELECT view_portfolio_transactions_with_investment_eur.id,
     view_portfolio_transactions_with_investment_eur.fund_id,
     view_portfolio_transactions_with_investment_eur.shares,
@@ -575,7 +575,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_transactions_with_investment_eur AS
     view_portfolio_transactions_with_investment_eur.invested_original,
     view_portfolio_transactions_with_investment_eur.invested_currency,
     view_portfolio_transactions_with_investment_eur.invested_date
-   FROM view_portfolio_transactions_with_investment_eur
+   FROM public.view_portfolio_transactions_with_investment_eur
   WITH NO DATA;
 
 
@@ -583,7 +583,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_transactions_with_investment_eur AS
 -- Name: portfolios; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE portfolios (
+CREATE TABLE public.portfolios (
     id integer NOT NULL,
     name character varying,
     created_at timestamp without time zone NOT NULL,
@@ -595,7 +595,7 @@ CREATE TABLE portfolios (
 -- Name: view_portfolio_euro_fund_history_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_euro_fund_history_eur AS
+CREATE VIEW public.view_portfolio_euro_fund_history_eur AS
  SELECT date(date_series.date_series) AS date,
     euro_funds.id AS fund_id,
     'EuroFund'::character varying AS fund_type,
@@ -611,24 +611,24 @@ CREATE VIEW view_portfolio_euro_fund_history_eur AS
     NULL::character varying AS shareprice_currency,
     NULL::date AS shareprice_date
    FROM (((((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
-           FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
-     CROSS JOIN euro_funds)
-     CROSS JOIN portfolios)
+           FROM public.matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
+     CROSS JOIN public.euro_funds)
+     CROSS JOIN public.portfolios)
      LEFT JOIN LATERAL ( SELECT matview_euro_fund_interest_filled.rate_for_computation,
             matview_euro_fund_interest_filled.year_length
-           FROM matview_euro_fund_interest_filled
+           FROM public.matview_euro_fund_interest_filled
           WHERE ((matview_euro_fund_interest_filled.euro_fund_id = euro_funds.id) AND (matview_euro_fund_interest_filled.date = date(date_series.date_series)))) interest_rate ON (true))
      LEFT JOIN LATERAL ( SELECT sum(matview_portfolio_transactions_with_investment_eur.invested_original) AS invested
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))) invested ON (true))
      LEFT JOIN LATERAL ( SELECT sum(matview_portfolio_transactions_with_investment_eur.amount_original) AS actual_pv
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at < date(date_series.date_series)) AND ((matview_portfolio_transactions_with_investment_eur.category)::text <> 'Virement'::text) AND ((matview_portfolio_transactions_with_investment_eur.category)::text <> 'Arbitrage'::text))) actual_pv ON (true))
      LEFT JOIN LATERAL ( SELECT sum((matview_portfolio_transactions_with_investment_eur.amount_original * ((((1)::numeric + interest_rate.rate_for_computation) ^ (((date(date_series.date_series) - matview_portfolio_transactions_with_investment_eur.done_at))::numeric / (interest_rate.year_length)::numeric)) - (1)::numeric))) AS latent_pv_this_year
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at >= (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))) latent_pv_this_year ON (true))
      LEFT JOIN LATERAL ( SELECT (sum(matview_portfolio_transactions_with_investment_eur.amount_original) * ((((1)::numeric + interest_rate.rate_for_computation) ^ ((((date(date_series.date_series) - (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date) + 1))::numeric / (interest_rate.year_length)::numeric)) - (1)::numeric)) AS latent_pv_last_year
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE ((matview_portfolio_transactions_with_investment_eur.fund_id = euro_funds.id) AND ((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'EuroFund'::text) AND (matview_portfolio_transactions_with_investment_eur.portfolio_id = portfolios.id) AND (matview_portfolio_transactions_with_investment_eur.done_at < (date_trunc('year'::text, (date(date_series.date_series))::timestamp with time zone))::date))) latent_pv_last_year ON (true))
   WHERE (invested.invested IS NOT NULL)
   ORDER BY (date(date_series.date_series)), portfolios.id, euro_funds.id;
@@ -638,7 +638,7 @@ CREATE VIEW view_portfolio_euro_fund_history_eur AS
 -- Name: matview_portfolio_euro_fund_history_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_euro_fund_history_eur AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_euro_fund_history_eur AS
  SELECT view_portfolio_euro_fund_history_eur.date,
     view_portfolio_euro_fund_history_eur.fund_id,
     view_portfolio_euro_fund_history_eur.fund_type,
@@ -653,7 +653,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_euro_fund_history_eur AS
     view_portfolio_euro_fund_history_eur.shareprice_original,
     view_portfolio_euro_fund_history_eur.shareprice_currency,
     view_portfolio_euro_fund_history_eur.shareprice_date
-   FROM view_portfolio_euro_fund_history_eur
+   FROM public.view_portfolio_euro_fund_history_eur
   WITH NO DATA;
 
 
@@ -661,7 +661,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_euro_fund_history_eur AS
 -- Name: view_portfolio_opcvm_fund_history_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_opcvm_fund_history_eur AS
+CREATE VIEW public.view_portfolio_opcvm_fund_history_eur AS
  SELECT date(date_series.date_series) AS date,
     opcvm_funds.id AS fund_id,
     'OpcvmFund'::character varying AS fund_type,
@@ -677,17 +677,17 @@ CREATE VIEW view_portfolio_opcvm_fund_history_eur AS
     'EUR'::character varying AS shareprice_currency,
     date(date_series.date_series) AS shareprice_date
    FROM ((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
-           FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
-     CROSS JOIN opcvm_funds)
-     CROSS JOIN portfolios)
+           FROM public.matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
+     CROSS JOIN public.opcvm_funds)
+     CROSS JOIN public.portfolios)
      JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
             matview_portfolio_transactions_with_investment_eur.portfolio_id,
             sum(matview_portfolio_transactions_with_investment_eur.shares) AS shares,
             sum(matview_portfolio_transactions_with_investment_eur.invested_original) AS invested
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE (((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'OpcvmFund'::text) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))
           GROUP BY matview_portfolio_transactions_with_investment_eur.fund_id, matview_portfolio_transactions_with_investment_eur.portfolio_id) t ON (((t.fund_id = opcvm_funds.id) AND (t.portfolio_id = portfolios.id))))
-     JOIN matview_opcvm_quotations_filled_eur ON (((opcvm_funds.id = matview_opcvm_quotations_filled_eur.opcvm_fund_id) AND (matview_opcvm_quotations_filled_eur.date = date(date_series.date_series)))))
+     JOIN public.matview_opcvm_quotations_filled_eur ON (((opcvm_funds.id = matview_opcvm_quotations_filled_eur.opcvm_fund_id) AND (matview_opcvm_quotations_filled_eur.date = date(date_series.date_series)))))
   ORDER BY (date(date_series.date_series)), portfolios.id, opcvm_funds.id;
 
 
@@ -695,7 +695,7 @@ CREATE VIEW view_portfolio_opcvm_fund_history_eur AS
 -- Name: matview_portfolio_opcvm_fund_history_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_opcvm_fund_history_eur AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_opcvm_fund_history_eur AS
  SELECT view_portfolio_opcvm_fund_history_eur.date,
     view_portfolio_opcvm_fund_history_eur.fund_id,
     view_portfolio_opcvm_fund_history_eur.fund_type,
@@ -710,7 +710,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_opcvm_fund_history_eur AS
     view_portfolio_opcvm_fund_history_eur.shareprice_original,
     view_portfolio_opcvm_fund_history_eur.shareprice_currency,
     view_portfolio_opcvm_fund_history_eur.shareprice_date
-   FROM view_portfolio_opcvm_fund_history_eur
+   FROM public.view_portfolio_opcvm_fund_history_eur
   WITH NO DATA;
 
 
@@ -718,7 +718,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_opcvm_fund_history_eur AS
 -- Name: scpi_quotations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE scpi_quotations (
+CREATE TABLE public.scpi_quotations (
     id integer NOT NULL,
     value_original numeric(15,5) NOT NULL,
     value_currency character varying NOT NULL,
@@ -737,7 +737,7 @@ CREATE TABLE scpi_quotations (
 -- Name: view_scpi_quotations_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_scpi_quotations_eur AS
+CREATE VIEW public.view_scpi_quotations_eur AS
  SELECT scpi_quotations.scpi_fund_id,
     scpi_quotations.date,
     (
@@ -759,8 +759,8 @@ CREATE VIEW view_scpi_quotations_eur AS
             WHEN ((scpi_quotations.value_currency)::text = 'EUR'::text) THEN NULL::date
             ELSE scpi_quotations.value_date
         END AS original_value_date
-   FROM (scpi_quotations
-     LEFT JOIN matview_eur_to_currency ON (((scpi_quotations.value_date = matview_eur_to_currency.date) AND ((scpi_quotations.value_currency)::text = (matview_eur_to_currency.currency_name)::text))))
+   FROM (public.scpi_quotations
+     LEFT JOIN public.matview_eur_to_currency ON (((scpi_quotations.value_date = matview_eur_to_currency.date) AND ((scpi_quotations.value_currency)::text = (matview_eur_to_currency.currency_name)::text))))
   ORDER BY scpi_quotations.scpi_fund_id, scpi_quotations.date;
 
 
@@ -768,7 +768,7 @@ CREATE VIEW view_scpi_quotations_eur AS
 -- Name: matview_scpi_quotations_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_scpi_quotations_eur AS
+CREATE MATERIALIZED VIEW public.matview_scpi_quotations_eur AS
  SELECT view_scpi_quotations_eur.scpi_fund_id,
     view_scpi_quotations_eur.date,
     view_scpi_quotations_eur.value_original,
@@ -777,7 +777,7 @@ CREATE MATERIALIZED VIEW matview_scpi_quotations_eur AS
     view_scpi_quotations_eur.original_value_original,
     view_scpi_quotations_eur.original_value_currency,
     view_scpi_quotations_eur.original_value_date
-   FROM view_scpi_quotations_eur
+   FROM public.view_scpi_quotations_eur
   WITH NO DATA;
 
 
@@ -785,7 +785,7 @@ CREATE MATERIALIZED VIEW matview_scpi_quotations_eur AS
 -- Name: scpi_funds; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE scpi_funds (
+CREATE TABLE public.scpi_funds (
     id integer NOT NULL,
     isin character varying NOT NULL,
     name character varying NOT NULL,
@@ -799,13 +799,13 @@ CREATE TABLE scpi_funds (
 -- Name: view_scpi_quotations_filled_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_scpi_quotations_filled_eur AS
+CREATE VIEW public.view_scpi_quotations_filled_eur AS
  WITH t_scpi_funds AS (
          SELECT scpi_funds.id,
             min(matview_scpi_quotations_eur.date) AS min_quotation,
             max(matview_scpi_quotations_eur.date) AS max_quotation
-           FROM (scpi_funds
-             JOIN matview_scpi_quotations_eur ON ((matview_scpi_quotations_eur.scpi_fund_id = scpi_funds.id)))
+           FROM (public.scpi_funds
+             JOIN public.matview_scpi_quotations_eur ON ((matview_scpi_quotations_eur.scpi_fund_id = scpi_funds.id)))
           GROUP BY scpi_funds.id
         )
  SELECT t_scpi_funds.id AS scpi_fund_id,
@@ -826,7 +826,7 @@ CREATE VIEW view_scpi_quotations_filled_eur AS
             matview_scpi_quotations_eur.original_value_original,
             matview_scpi_quotations_eur.original_value_currency,
             matview_scpi_quotations_eur.original_value_date
-           FROM matview_scpi_quotations_eur
+           FROM public.matview_scpi_quotations_eur
           WHERE ((matview_scpi_quotations_eur.scpi_fund_id = t_scpi_funds.id) AND (matview_scpi_quotations_eur.date <= date_series.date_series))
           ORDER BY matview_scpi_quotations_eur.date DESC
          LIMIT 1) t_values ON (true))
@@ -841,7 +841,7 @@ UNION
     t_values.original_value_date
    FROM ((t_scpi_funds
      CROSS JOIN LATERAL generate_series((t_scpi_funds.max_quotation + '1 day'::interval), ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series))
-     LEFT JOIN matview_scpi_quotations_eur t_values ON (((t_values.scpi_fund_id = t_scpi_funds.id) AND (t_values.date = t_scpi_funds.max_quotation))))
+     LEFT JOIN public.matview_scpi_quotations_eur t_values ON (((t_values.scpi_fund_id = t_scpi_funds.id) AND (t_values.date = t_scpi_funds.max_quotation))))
   ORDER BY 1, 2;
 
 
@@ -849,7 +849,7 @@ UNION
 -- Name: matview_scpi_quotations_filled_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_scpi_quotations_filled_eur AS
+CREATE MATERIALIZED VIEW public.matview_scpi_quotations_filled_eur AS
  SELECT view_scpi_quotations_filled_eur.scpi_fund_id,
     view_scpi_quotations_filled_eur.date,
     view_scpi_quotations_filled_eur.value_original,
@@ -858,7 +858,7 @@ CREATE MATERIALIZED VIEW matview_scpi_quotations_filled_eur AS
     view_scpi_quotations_filled_eur.original_value_original,
     view_scpi_quotations_filled_eur.original_value_currency,
     view_scpi_quotations_filled_eur.original_value_date
-   FROM view_scpi_quotations_filled_eur
+   FROM public.view_scpi_quotations_filled_eur
   WITH NO DATA;
 
 
@@ -866,7 +866,7 @@ CREATE MATERIALIZED VIEW matview_scpi_quotations_filled_eur AS
 -- Name: view_portfolio_scpi_fund_history_eur; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_scpi_fund_history_eur AS
+CREATE VIEW public.view_portfolio_scpi_fund_history_eur AS
  SELECT date(date_series.date_series) AS date,
     scpi_funds.id AS fund_id,
     'ScpiFund'::character varying AS fund_type,
@@ -882,17 +882,17 @@ CREATE VIEW view_portfolio_scpi_fund_history_eur AS
     'EUR'::character varying AS shareprice_currency,
     date(date_series.date_series) AS shareprice_date
    FROM ((((generate_series((( SELECT min(matview_portfolio_transactions_with_investment_eur.done_at) AS min
-           FROM matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
-     CROSS JOIN scpi_funds)
-     CROSS JOIN portfolios)
+           FROM public.matview_portfolio_transactions_with_investment_eur))::timestamp without time zone, ((transaction_timestamp())::date + '30 days'::interval), '1 day'::interval) date_series(date_series)
+     CROSS JOIN public.scpi_funds)
+     CROSS JOIN public.portfolios)
      JOIN LATERAL ( SELECT matview_portfolio_transactions_with_investment_eur.fund_id,
             matview_portfolio_transactions_with_investment_eur.portfolio_id,
             sum(matview_portfolio_transactions_with_investment_eur.shares) AS shares,
             sum(matview_portfolio_transactions_with_investment_eur.invested_original) AS invested
-           FROM matview_portfolio_transactions_with_investment_eur
+           FROM public.matview_portfolio_transactions_with_investment_eur
           WHERE (((matview_portfolio_transactions_with_investment_eur.fund_type)::text = 'ScpiFund'::text) AND (matview_portfolio_transactions_with_investment_eur.done_at <= date(date_series.date_series)))
           GROUP BY matview_portfolio_transactions_with_investment_eur.fund_id, matview_portfolio_transactions_with_investment_eur.portfolio_id) t ON (((t.fund_id = scpi_funds.id) AND (t.portfolio_id = portfolios.id))))
-     JOIN matview_scpi_quotations_filled_eur ON (((scpi_funds.id = matview_scpi_quotations_filled_eur.scpi_fund_id) AND (matview_scpi_quotations_filled_eur.date = date(date_series.date_series)))))
+     JOIN public.matview_scpi_quotations_filled_eur ON (((scpi_funds.id = matview_scpi_quotations_filled_eur.scpi_fund_id) AND (matview_scpi_quotations_filled_eur.date = date(date_series.date_series)))))
   ORDER BY (date(date_series.date_series)), portfolios.id, scpi_funds.id;
 
 
@@ -900,7 +900,7 @@ CREATE VIEW view_portfolio_scpi_fund_history_eur AS
 -- Name: matview_portfolio_scpi_fund_history_eur; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_scpi_fund_history_eur AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_scpi_fund_history_eur AS
  SELECT view_portfolio_scpi_fund_history_eur.date,
     view_portfolio_scpi_fund_history_eur.fund_id,
     view_portfolio_scpi_fund_history_eur.fund_type,
@@ -915,7 +915,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_scpi_fund_history_eur AS
     view_portfolio_scpi_fund_history_eur.shareprice_original,
     view_portfolio_scpi_fund_history_eur.shareprice_currency,
     view_portfolio_scpi_fund_history_eur.shareprice_date
-   FROM view_portfolio_scpi_fund_history_eur
+   FROM public.view_portfolio_scpi_fund_history_eur
   WITH NO DATA;
 
 
@@ -923,7 +923,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_scpi_fund_history_eur AS
 -- Name: view_portfolio_history; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_history AS
+CREATE VIEW public.view_portfolio_history AS
  SELECT history.date,
     history.fund_id,
     history.fund_type,
@@ -995,7 +995,7 @@ CREATE VIEW view_portfolio_history AS
             matview_portfolio_euro_fund_history_eur.shareprice_original,
             matview_portfolio_euro_fund_history_eur.shareprice_currency,
             matview_portfolio_euro_fund_history_eur.shareprice_date
-           FROM matview_portfolio_euro_fund_history_eur
+           FROM public.matview_portfolio_euro_fund_history_eur
         UNION
          SELECT matview_portfolio_opcvm_fund_history_eur.date,
             matview_portfolio_opcvm_fund_history_eur.fund_id,
@@ -1011,7 +1011,7 @@ CREATE VIEW view_portfolio_history AS
             matview_portfolio_opcvm_fund_history_eur.shareprice_original,
             matview_portfolio_opcvm_fund_history_eur.shareprice_currency,
             matview_portfolio_opcvm_fund_history_eur.shareprice_date
-           FROM matview_portfolio_opcvm_fund_history_eur
+           FROM public.matview_portfolio_opcvm_fund_history_eur
         UNION
          SELECT matview_portfolio_scpi_fund_history_eur.date,
             matview_portfolio_scpi_fund_history_eur.fund_id,
@@ -1027,7 +1027,7 @@ CREATE VIEW view_portfolio_history AS
             matview_portfolio_scpi_fund_history_eur.shareprice_original,
             matview_portfolio_scpi_fund_history_eur.shareprice_currency,
             matview_portfolio_scpi_fund_history_eur.shareprice_date
-           FROM matview_portfolio_scpi_fund_history_eur) history
+           FROM public.matview_portfolio_scpi_fund_history_eur) history
   ORDER BY history.date, history.portfolio_id, history.fund_type, history.fund_id;
 
 
@@ -1035,7 +1035,7 @@ CREATE VIEW view_portfolio_history AS
 -- Name: matview_portfolio_history; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_history AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_history AS
  SELECT view_portfolio_history.date,
     view_portfolio_history.fund_id,
     view_portfolio_history.fund_type,
@@ -1054,7 +1054,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_history AS
     view_portfolio_history.shareprice_currency,
     view_portfolio_history.shareprice_date,
     view_portfolio_history.percent
-   FROM view_portfolio_history
+   FROM public.view_portfolio_history
   WITH NO DATA;
 
 
@@ -1062,7 +1062,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_history AS
 -- Name: view_portfolio_performance; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW view_portfolio_performance AS
+CREATE VIEW public.view_portfolio_performance AS
  SELECT matview_portfolio_history.date,
     matview_portfolio_history.portfolio_id,
     (sum(matview_portfolio_history.invested_original))::numeric(15,5) AS invested_original,
@@ -1074,7 +1074,7 @@ CREATE VIEW view_portfolio_performance AS
     (sum(matview_portfolio_history.pv_original))::numeric(15,5) AS pv_original,
     'EUR'::character varying AS pv_currency,
     matview_portfolio_history.date AS pv_date
-   FROM matview_portfolio_history
+   FROM public.matview_portfolio_history
   WHERE (matview_portfolio_history.invested_original IS NOT NULL)
   GROUP BY matview_portfolio_history.date, matview_portfolio_history.portfolio_id
   ORDER BY matview_portfolio_history.date, matview_portfolio_history.portfolio_id;
@@ -1084,7 +1084,7 @@ CREATE VIEW view_portfolio_performance AS
 -- Name: matview_portfolio_performance; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW matview_portfolio_performance AS
+CREATE MATERIALIZED VIEW public.matview_portfolio_performance AS
  SELECT view_portfolio_performance.date,
     view_portfolio_performance.portfolio_id,
     view_portfolio_performance.invested_original,
@@ -1096,7 +1096,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_performance AS
     view_portfolio_performance.pv_original,
     view_portfolio_performance.pv_currency,
     view_portfolio_performance.pv_date
-   FROM view_portfolio_performance
+   FROM public.view_portfolio_performance
   WITH NO DATA;
 
 
@@ -1104,7 +1104,7 @@ CREATE MATERIALIZED VIEW matview_portfolio_performance AS
 -- Name: opcvm_funds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE opcvm_funds_id_seq
+CREATE SEQUENCE public.opcvm_funds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1116,14 +1116,14 @@ CREATE SEQUENCE opcvm_funds_id_seq
 -- Name: opcvm_funds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE opcvm_funds_id_seq OWNED BY opcvm_funds.id;
+ALTER SEQUENCE public.opcvm_funds_id_seq OWNED BY public.opcvm_funds.id;
 
 
 --
 -- Name: portfolio_transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE portfolio_transactions_id_seq
+CREATE SEQUENCE public.portfolio_transactions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1135,14 +1135,14 @@ CREATE SEQUENCE portfolio_transactions_id_seq
 -- Name: portfolio_transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE portfolio_transactions_id_seq OWNED BY portfolio_transactions.id;
+ALTER SEQUENCE public.portfolio_transactions_id_seq OWNED BY public.portfolio_transactions.id;
 
 
 --
 -- Name: portfolios_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE portfolios_id_seq
+CREATE SEQUENCE public.portfolios_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1154,14 +1154,14 @@ CREATE SEQUENCE portfolios_id_seq
 -- Name: portfolios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE portfolios_id_seq OWNED BY portfolios.id;
+ALTER SEQUENCE public.portfolios_id_seq OWNED BY public.portfolios.id;
 
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE schema_migrations (
+CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
 );
 
@@ -1170,7 +1170,7 @@ CREATE TABLE schema_migrations (
 -- Name: scpi_funds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE scpi_funds_id_seq
+CREATE SEQUENCE public.scpi_funds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1182,14 +1182,14 @@ CREATE SEQUENCE scpi_funds_id_seq
 -- Name: scpi_funds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE scpi_funds_id_seq OWNED BY scpi_funds.id;
+ALTER SEQUENCE public.scpi_funds_id_seq OWNED BY public.scpi_funds.id;
 
 
 --
 -- Name: scpi_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE scpi_quotations_id_seq
+CREATE SEQUENCE public.scpi_quotations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1201,84 +1201,84 @@ CREATE SEQUENCE scpi_quotations_id_seq
 -- Name: scpi_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE scpi_quotations_id_seq OWNED BY scpi_quotations.id;
+ALTER SEQUENCE public.scpi_quotations_id_seq OWNED BY public.scpi_quotations.id;
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currencies ALTER COLUMN id SET DEFAULT nextval('currencies_id_seq'::regclass);
+ALTER TABLE ONLY public.currencies ALTER COLUMN id SET DEFAULT nextval('public.currencies_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency_quotations ALTER COLUMN id SET DEFAULT nextval('currency_cotations_id_seq'::regclass);
+ALTER TABLE ONLY public.currency_quotations ALTER COLUMN id SET DEFAULT nextval('public.currency_cotations_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY euro_funds ALTER COLUMN id SET DEFAULT nextval('euro_funds_id_seq'::regclass);
+ALTER TABLE ONLY public.euro_funds ALTER COLUMN id SET DEFAULT nextval('public.euro_funds_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY interest_rates ALTER COLUMN id SET DEFAULT nextval('interest_rates_id_seq'::regclass);
+ALTER TABLE ONLY public.interest_rates ALTER COLUMN id SET DEFAULT nextval('public.interest_rates_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY opcvm_funds ALTER COLUMN id SET DEFAULT nextval('opcvm_funds_id_seq'::regclass);
+ALTER TABLE ONLY public.opcvm_funds ALTER COLUMN id SET DEFAULT nextval('public.opcvm_funds_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY opcvm_quotations ALTER COLUMN id SET DEFAULT nextval('fund_cotations_id_seq'::regclass);
+ALTER TABLE ONLY public.opcvm_quotations ALTER COLUMN id SET DEFAULT nextval('public.fund_cotations_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY portfolio_transactions ALTER COLUMN id SET DEFAULT nextval('portfolio_transactions_id_seq'::regclass);
+ALTER TABLE ONLY public.portfolio_transactions ALTER COLUMN id SET DEFAULT nextval('public.portfolio_transactions_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY portfolios ALTER COLUMN id SET DEFAULT nextval('portfolios_id_seq'::regclass);
+ALTER TABLE ONLY public.portfolios ALTER COLUMN id SET DEFAULT nextval('public.portfolios_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY scpi_funds ALTER COLUMN id SET DEFAULT nextval('scpi_funds_id_seq'::regclass);
+ALTER TABLE ONLY public.scpi_funds ALTER COLUMN id SET DEFAULT nextval('public.scpi_funds_id_seq'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY scpi_quotations ALTER COLUMN id SET DEFAULT nextval('scpi_quotations_id_seq'::regclass);
+ALTER TABLE ONLY public.scpi_quotations ALTER COLUMN id SET DEFAULT nextval('public.scpi_quotations_id_seq'::regclass);
 
 
 --
 -- Name: currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currencies
+ALTER TABLE ONLY public.currencies
     ADD CONSTRAINT currencies_pkey PRIMARY KEY (id);
 
 
@@ -1286,7 +1286,7 @@ ALTER TABLE ONLY currencies
 -- Name: currency_quotations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency_quotations
+ALTER TABLE ONLY public.currency_quotations
     ADD CONSTRAINT currency_quotations_pkey PRIMARY KEY (id);
 
 
@@ -1294,7 +1294,7 @@ ALTER TABLE ONLY currency_quotations
 -- Name: euro_funds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY euro_funds
+ALTER TABLE ONLY public.euro_funds
     ADD CONSTRAINT euro_funds_pkey PRIMARY KEY (id);
 
 
@@ -1302,7 +1302,7 @@ ALTER TABLE ONLY euro_funds
 -- Name: fund_quotations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY opcvm_quotations
+ALTER TABLE ONLY public.opcvm_quotations
     ADD CONSTRAINT fund_quotations_pkey PRIMARY KEY (id);
 
 
@@ -1310,7 +1310,7 @@ ALTER TABLE ONLY opcvm_quotations
 -- Name: interest_rates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY interest_rates
+ALTER TABLE ONLY public.interest_rates
     ADD CONSTRAINT interest_rates_pkey PRIMARY KEY (id);
 
 
@@ -1318,7 +1318,7 @@ ALTER TABLE ONLY interest_rates
 -- Name: opcvm_funds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY opcvm_funds
+ALTER TABLE ONLY public.opcvm_funds
     ADD CONSTRAINT opcvm_funds_pkey PRIMARY KEY (id);
 
 
@@ -1326,7 +1326,7 @@ ALTER TABLE ONLY opcvm_funds
 -- Name: portfolio_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY portfolio_transactions
+ALTER TABLE ONLY public.portfolio_transactions
     ADD CONSTRAINT portfolio_transactions_pkey PRIMARY KEY (id);
 
 
@@ -1334,7 +1334,7 @@ ALTER TABLE ONLY portfolio_transactions
 -- Name: portfolios_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY portfolios
+ALTER TABLE ONLY public.portfolios
     ADD CONSTRAINT portfolios_pkey PRIMARY KEY (id);
 
 
@@ -1342,7 +1342,7 @@ ALTER TABLE ONLY portfolios
 -- Name: scpi_funds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY scpi_funds
+ALTER TABLE ONLY public.scpi_funds
     ADD CONSTRAINT scpi_funds_pkey PRIMARY KEY (id);
 
 
@@ -1350,7 +1350,7 @@ ALTER TABLE ONLY scpi_funds
 -- Name: scpi_quotations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY scpi_quotations
+ALTER TABLE ONLY public.scpi_quotations
     ADD CONSTRAINT scpi_quotations_pkey PRIMARY KEY (id);
 
 
@@ -1358,109 +1358,109 @@ ALTER TABLE ONLY scpi_quotations
 -- Name: index_currency_quotations_on_id_and_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_currency_quotations_on_id_and_date ON currency_quotations USING btree (currency_id, date);
+CREATE INDEX index_currency_quotations_on_id_and_date ON public.currency_quotations USING btree (currency_id, date);
 
 
 --
 -- Name: index_interest_rates_on_object_type_and_object_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_interest_rates_on_object_type_and_object_id ON interest_rates USING btree (object_type, object_id);
+CREATE INDEX index_interest_rates_on_object_type_and_object_id ON public.interest_rates USING btree (object_type, object_id);
 
 
 --
 -- Name: index_matview_opcvm_quotations_eur_on_opcvm_fund_id_and_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_matview_opcvm_quotations_eur_on_opcvm_fund_id_and_date ON matview_opcvm_quotations_eur USING btree (opcvm_fund_id, date);
+CREATE INDEX index_matview_opcvm_quotations_eur_on_opcvm_fund_id_and_date ON public.matview_opcvm_quotations_eur USING btree (opcvm_fund_id, date);
 
 
 --
 -- Name: index_matview_opcvm_quotations_filled_eur_on_opcvm_fund_id_and_; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_matview_opcvm_quotations_filled_eur_on_opcvm_fund_id_and_ ON matview_opcvm_quotations_filled_eur USING btree (opcvm_fund_id, date);
+CREATE INDEX index_matview_opcvm_quotations_filled_eur_on_opcvm_fund_id_and_ ON public.matview_opcvm_quotations_filled_eur USING btree (opcvm_fund_id, date);
 
 
 --
 -- Name: index_matview_scpi_quotations_eur_on_scpi_fund_id_and_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_matview_scpi_quotations_eur_on_scpi_fund_id_and_date ON matview_scpi_quotations_eur USING btree (scpi_fund_id, date);
+CREATE INDEX index_matview_scpi_quotations_eur_on_scpi_fund_id_and_date ON public.matview_scpi_quotations_eur USING btree (scpi_fund_id, date);
 
 
 --
 -- Name: index_matview_scpi_quotations_filled_eur_on_scpi_fund_id_and_da; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_matview_scpi_quotations_filled_eur_on_scpi_fund_id_and_da ON matview_scpi_quotations_filled_eur USING btree (scpi_fund_id, date);
+CREATE INDEX index_matview_scpi_quotations_filled_eur_on_scpi_fund_id_and_da ON public.matview_scpi_quotations_filled_eur USING btree (scpi_fund_id, date);
 
 
 --
 -- Name: index_opcvm_quotations_on_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_opcvm_quotations_on_date ON opcvm_quotations USING btree (date);
+CREATE INDEX index_opcvm_quotations_on_date ON public.opcvm_quotations USING btree (date);
 
 
 --
 -- Name: index_opcvm_quotations_on_date_and_fund; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_opcvm_quotations_on_date_and_fund ON opcvm_quotations USING btree (opcvm_fund_id, date);
+CREATE INDEX index_opcvm_quotations_on_date_and_fund ON public.opcvm_quotations USING btree (opcvm_fund_id, date);
 
 
 --
 -- Name: index_portfolio_transactions_on_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_portfolio_transactions_on_date ON portfolio_transactions USING btree (done_at);
+CREATE INDEX index_portfolio_transactions_on_date ON public.portfolio_transactions USING btree (done_at);
 
 
 --
 -- Name: index_portfolio_transactions_on_date_and_fund; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_portfolio_transactions_on_date_and_fund ON portfolio_transactions USING btree (fund_id, fund_type, done_at);
+CREATE INDEX index_portfolio_transactions_on_date_and_fund ON public.portfolio_transactions USING btree (fund_id, fund_type, done_at);
 
 
 --
 -- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (version);
+CREATE UNIQUE INDEX unique_schema_migrations ON public.schema_migrations USING btree (version);
 
 
 --
 -- Name: fk_rails_304e76d585; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY scpi_quotations
-    ADD CONSTRAINT fk_rails_304e76d585 FOREIGN KEY (scpi_fund_id) REFERENCES scpi_funds(id);
+ALTER TABLE ONLY public.scpi_quotations
+    ADD CONSTRAINT fk_rails_304e76d585 FOREIGN KEY (scpi_fund_id) REFERENCES public.scpi_funds(id);
 
 
 --
 -- Name: fk_rails_6aaddc1d5a; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY portfolio_transactions
-    ADD CONSTRAINT fk_rails_6aaddc1d5a FOREIGN KEY (portfolio_id) REFERENCES portfolios(id);
+ALTER TABLE ONLY public.portfolio_transactions
+    ADD CONSTRAINT fk_rails_6aaddc1d5a FOREIGN KEY (portfolio_id) REFERENCES public.portfolios(id);
 
 
 --
 -- Name: fk_rails_9223c12f29; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency_quotations
-    ADD CONSTRAINT fk_rails_9223c12f29 FOREIGN KEY (currency_id) REFERENCES currencies(id);
+ALTER TABLE ONLY public.currency_quotations
+    ADD CONSTRAINT fk_rails_9223c12f29 FOREIGN KEY (currency_id) REFERENCES public.currencies(id);
 
 
 --
 -- Name: fk_rails_b6a68318ce; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY opcvm_quotations
-    ADD CONSTRAINT fk_rails_b6a68318ce FOREIGN KEY (opcvm_fund_id) REFERENCES opcvm_funds(id);
+ALTER TABLE ONLY public.opcvm_quotations
+    ADD CONSTRAINT fk_rails_b6a68318ce FOREIGN KEY (opcvm_fund_id) REFERENCES public.opcvm_funds(id);
 
 
 --
@@ -1586,4 +1586,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160713220131');
 INSERT INTO schema_migrations (version) VALUES ('20160713221510');
 
 INSERT INTO schema_migrations (version) VALUES ('20160713222331');
+
+INSERT INTO schema_migrations (version) VALUES ('20180603155802');
 

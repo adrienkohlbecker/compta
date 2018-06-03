@@ -4,16 +4,8 @@ require 'json'
 class Boursorama::QuotationHistory
   VERSION = 1
 
-  def initialize(symbol, period = :daily)
-    if period == :daily
-      pe = '0'
-      duree = '36'
-    else
-      pe = '1'
-      duree = '120'
-    end
-
-    @uri = "http://www.boursorama.com/bourse/cours/graphiques/historique.phtml?symbole=#{symbol}&duree=#{duree}&pe=#{pe}"
+  def initialize(symbol)
+    @uri = "https://www.boursorama.com/bourse/action/graph/ws/GetTicksEOD?{%22symbol%22:%22#{symbol}%22,%22length%22:7300,%22period%22:0,%22guid%22:%22%22}"
     @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
@@ -37,30 +29,18 @@ class Boursorama::QuotationHistory
     data
   end
 
-  def quotation_history_url
-    'http://www.boursorama.com' + doc.content.match(%r{"(/graphiques/quotes.phtml.*)"})[1]
-  end
-
   def quotation_history
-    json['dataSets'].first['dataProvider'].each_with_object({}) do |item, h|
-      date = Date.parse(item['d'].split(' ').first)
+    json['d']['QuoteTab'].each_with_object({}) do |item, h|
+      date = Date.new(1970,1,1).days_since(item['d'])
       h[date] = item['c'].to_s
     end
-  end
-
-  def doc
-    @doc ||= fetch_document
   end
 
   def json
     @json ||= fetch_json
   end
 
-  private def fetch_document
-    Nokogiri::HTML(@http.get, nil, 'ISO-8859-15')
-  end
-
   private def fetch_json
-    JSON.load(HTTPCache.new(quotation_history_url, key: :boursorama, expires_in: 3600 * 24).get)
+    JSON.load(@http.get)
   end
 end

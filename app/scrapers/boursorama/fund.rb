@@ -4,8 +4,8 @@ require 'nokogiri'
 class Boursorama::Fund
   VERSION = 1
 
-  def initialize(boursorama_id)
-    @uri = "http://www.boursorama.com/bourse/opcvm/opcvm.phtml?symbole=#{boursorama_id}"
+  def initialize(boursorama_id, boursorama_type)
+    @uri = "https://www.boursorama.com/bourse/#{boursorama_type}/cours/#{boursorama_id}/"
     @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
@@ -30,36 +30,15 @@ class Boursorama::Fund
   end
 
   def name
-    doc.css('[itemprop="name"]').first.content.strip
+    doc.css('.c-faceplate__company-link').first.content.strip
   end
 
   def isin
-    doc.css('.fv-isin').first.content.match(/.* ([a-zA-Z]{2}[0-9a-zA-Z]{10}) .*/)[1]
-  end
-
-  def quotation
-    doc.css('.cotation').first.content.split(' ').first
-  end
-
-  def quotation_date
-    date = nil
-    doc.css('#fiche_cours_details tr').each do |tr|
-      if tr.css('td')[0].content.strip.gsub(/\302\240/, '') == 'Date'
-        date = Date.parse(tr.css('td')[2].content.strip.gsub(/\302\240/, ''))
-      end
-
-      next if tr.css('small[title="Données temps réel"]').empty?
-      date = if Time.now.hour < 9 # avant l'ouverture, la page date d'hier
-               Date.yesterday
-             else
-               Date.today
-             end
-    end
-    date
+    doc.css('.c-faceplate__isin').first.content.match(/^([a-zA-Z]{2}[0-9a-zA-Z]{10}).*/)[1]
   end
 
   def currency
-    doc.css('.cotation').first.content.split(' ').last
+    doc.css('.c-faceplate__price-currency').first.content
   end
 
   def doc
