@@ -21,7 +21,7 @@ module GnuCash
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-        Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2014, 01, 01)).where.not(value_original: nil).each do |quotation|
+        Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
@@ -40,7 +40,7 @@ module GnuCash
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-        Matview::ScpiQuotationsFilledEur.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2014, 01, 01)).where.not(value_original: nil).each do |quotation|
+        Matview::ScpiQuotationsFilledEur.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
@@ -59,7 +59,7 @@ module GnuCash
       raise "Could not find commodity for currency #{currency.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-        Matview::EurToCurrency.where(currency_name: currency.name).where('date >= ?', Date.new(2014, 01, 01)).where.not(value: nil).each do |quotation|
+        Matview::EurToCurrency.where(currency_name: currency.name).where('date >= ?', Date.new(2013, 01, 01)).where.not(value: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
