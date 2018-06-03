@@ -21,7 +21,26 @@ class Currency < ActiveRecord::Base
   end
 
   def refresh_quotation_history
-    bf_id.nil? ? refresh_quotation_history_from_boursorama : refresh_quotation_history_from_bf
+    case true
+    when !bf_id.nil?
+      refresh_quotation_history_from_bf
+    when !coingecko_chart.nil?
+      refresh_quotation_history_from_coingecko
+    else
+      refresh_quotation_history_from_boursorama
+    end
+  end
+
+  private def refresh_quotation_history_from_coingecko
+    transaction do
+      history = Coingecko::QuotationHistory.new(coingecko_chart).quotation_history
+
+      history.each do |date, value|
+        append_or_refresh_quotation(date, value)
+      end
+    end
+
+    nil
   end
 
   private def refresh_quotation_history_from_bf

@@ -43,7 +43,8 @@ CREATE TABLE public.currencies (
     url character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    bf_id character varying
+    bf_id character varying,
+    coingecko_chart character varying
 );
 
 
@@ -1588,4 +1589,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160713221510');
 INSERT INTO schema_migrations (version) VALUES ('20160713222331');
 
 INSERT INTO schema_migrations (version) VALUES ('20180603155802');
+
+INSERT INTO schema_migrations (version) VALUES ('20180603215505');
 
