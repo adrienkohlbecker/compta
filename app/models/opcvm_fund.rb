@@ -14,6 +14,7 @@
 
 class OpcvmFund < ActiveRecord::Base
   has_many :quotations, -> { order(date: :desc) }, class_name: 'OpcvmQuotation'
+  has_many :quotations_filled_eur, -> { where.not(value_original: nil).order(date: :desc) }, class_name: 'Matview::OpcvmQuotationsFilledEur'
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def refresh_data

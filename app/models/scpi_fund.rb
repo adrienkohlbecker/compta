@@ -1,5 +1,6 @@
 class ScpiFund < ActiveRecord::Base
   has_many :quotations, -> { order(date: :desc) }, class_name: 'ScpiQuotation'
+  has_many :quotations_filled_eur, -> { where.not(value_original: nil).order(date: :desc) }, class_name: 'Matview::ScpiQuotationsFilledEur'
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def quotation_at(date)
