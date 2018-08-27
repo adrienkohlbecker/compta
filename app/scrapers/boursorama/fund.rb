@@ -38,7 +38,7 @@ class Boursorama::Fund
   end
 
   def currency
-    doc.css('.c-faceplate__price-currency').first.content
+    doc.css('.c-faceplate__price-currency').first.content.strip
   end
 
   def doc
