@@ -13,7 +13,7 @@
 #
 
 class OpcvmFund < ActiveRecord::Base
-  has_many :quotations, class_name: 'OpcvmQuotation'
+  has_many :quotations, -> { order(date: :desc) }, class_name: 'OpcvmQuotation'
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def refresh_data
