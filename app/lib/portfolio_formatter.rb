@@ -212,7 +212,7 @@ class PortfolioFormatter
       end
 
       sheet.add_chart(Axlsx::LineChart, start_at: [5, 2], end_at: [20, 40], title: 'Performance') do |chart|
-        chart.add_series data: sheet["D2:D#{row_count + 1}"], labels: sheet["A2:A#{row_count + 1}"], title: 'PV'
+        chart.add_series data: [sheet["D2"],sheet["D#{row_count + 1}"]], labels: [sheet["A2"],sheet["A#{row_count + 1}"]], title: 'PV'
 
         chart.style = 1
 
