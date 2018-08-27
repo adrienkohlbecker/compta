@@ -1,5 +1,5 @@
 class ScpiFund < ActiveRecord::Base
-  has_many :quotations, -> { order(date: :desc) }, class_name: 'OpcvmQuotation'
+  has_many :quotations, -> { order(date: :desc) }, class_name: 'ScpiQuotation'
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def quotation_at(date)
