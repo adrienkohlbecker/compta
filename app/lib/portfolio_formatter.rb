@@ -145,7 +145,7 @@ class PortfolioFormatter
     puts Hirb::Helpers::AutoTable.render(items)
   end
 
-  def excel(path = './Portfolio.xslx')
+  def excel(path = './Portfolio.xlsx')
     p = Axlsx::Package.new
     wb = p.workbook
 
