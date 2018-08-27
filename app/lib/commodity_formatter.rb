@@ -21,7 +21,7 @@ class CommodityFormatter
       sheet_name = item_class == Currency ? item.name : item.isin
 
       wb.add_worksheet(name: sheet_name) do |sheet|
-        sheet.add_row ['Date', '1EUR=', '=EUR', '', '', '', '', item.name]
+        sheet.add_row ['Date', '1EUR=', '\'=EUR', '', '', '', '', item.name]
 
         row_count = 0
 
