@@ -1,4 +1,4 @@
-class Formatter
+class PortfolioFormatter
 
   attr_accessor :portfiolio_ids
 
