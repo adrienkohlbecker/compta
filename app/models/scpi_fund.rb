@@ -8,7 +8,7 @@ class ScpiFund < ActiveRecord::Base
 
   def append_or_refresh_quotation(date, value)
     c = quotations.where(date: date).first_or_create
-    c.value = Amount.new(value, currency, date)
+    c.value = value.nil? ? nil : Amount.new(value, currency, date)
     c.save!
   end
 

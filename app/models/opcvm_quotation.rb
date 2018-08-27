@@ -17,7 +17,7 @@ class OpcvmQuotation < ActiveRecord::Base
   belongs_to :fund, class_name: 'OpcvmFund', foreign_key: :opcvm_fund_id
 
   def value
-    @_value ||= Amount.new(value_original, value_currency, value_date)
+    @_value ||= value_original.nil? ? nil : Amount.new(value_original, value_currency, value_date)
   end
 
   def value=(amount)
