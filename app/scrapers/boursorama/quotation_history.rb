@@ -5,7 +5,7 @@ class Boursorama::QuotationHistory
   VERSION = 1
 
   def initialize(symbol)
-    @uri = "https://www.boursorama.com/bourse/action/graph/ws/GetTicksEOD?{%22symbol%22:%22#{symbol}%22,%22length%22:7300,%22period%22:0,%22guid%22:%22%22}"
+    @uri = "https://www.boursorama.com/bourse/action/graph/ws/GetTicksEOD?symbol=#{symbol}&length=7300&period=0&guid="
     @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
