@@ -21,7 +21,7 @@ module GnuCash
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
       GnuCash::Base.transaction do
-        Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2007, 08, 31)).where.not(value_original: nil).each do |quotation|
+        Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2007, 8, 31)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
