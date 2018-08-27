@@ -46,6 +46,6 @@ class Boursorama::Fund
   end
 
   private def fetch_document
-    Nokogiri::HTML(@http.get, nil, 'ISO-8859-15')
+    Nokogiri::HTML(@http.get, nil, 'UTF-8')
   end
 end
