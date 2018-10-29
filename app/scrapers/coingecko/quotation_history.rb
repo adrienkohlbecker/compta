@@ -5,7 +5,7 @@ class Coingecko::QuotationHistory
   VERSION = 1
 
   def initialize(chart)
-    @uri = "https://www.coingecko.com/chart/#{chart}/eur.json?locale=en"
+    @uri = "https://www.coingecko.com/price_charts/#{chart}/eur/max.json?locale=en"
     @http = HTTPCache.new(@uri, key: :coingecko, expires_in: 3600 * 24)
   end
 
