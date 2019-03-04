@@ -28,3 +28,35 @@ def excel_export!(path)
   puts 'excel: SCPI'
   CommodityFormatter.new(ScpiFund).excel("#{path}/SCPI.xlsx")
 end
+
+def hledger_prices!
+  groups = {}
+  Currency.find_each do |currency|
+    groups[currency.name] ||= []
+    Matview::EurToCurrency.where(currency_name: currency.name).where('date >= ?', Date.new(2013, 01, 01)).where.not(value: nil).all.each do |i|
+      groups[currency.name] << [i.date, currency.name, 1/i.value]
+    end
+  end
+  ScpiFund.find_each do |fund|
+    groups[fund.isin] = []
+    Matview::ScpiQuotationsFilledEur.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).all.each do |i|
+      groups[fund.isin] << [i.date, fund.isin, i.value_original]
+    end
+  end
+  OpcvmFund.find_each do |fund|
+    groups[fund.isin] = []
+    Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).all.each do |i|
+      groups[fund.isin] << [i.date, fund.isin, i.value_original]
+    end
+  end
+
+  groups.each do |name, values|
+    contents = values.map{ |v| "P #{v[0].strftime("%Y/%m/%d")} \"#{v[1]}\" \u20AC #{"%e" % v[2]}" }.join("\n")
+    File.write("/hledger/prices/#{name}.journal", contents + "\n")
+  end
+
+  index = groups.keys.map { |k| "include #{k}.journal" }.join("\n")
+  File.write("/hledger/prices/main.journal", index + "\n")
+
+  true
+end

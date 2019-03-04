@@ -7,6 +7,7 @@ services:
       - .:/app/compta
       - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Compta:/dropbox
       - ~/Library/Mobile Documents/com~apple~CloudDocs/Applications/Gnucash:/gnucash
+      - ~/Work/hledger:/hledger
       - ~/.pryrc:/root/.pryrc
       - ~/.pry_history:/root/.pry_history
     environment:
