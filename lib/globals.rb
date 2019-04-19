@@ -60,3 +60,67 @@ def hledger_prices!
 
   true
 end
+
+def import_transactions_from_gnucash!(id, identifier)
+
+  PortfolioTransaction.where(portfolio_id: id).delete_all
+
+  root = GnuCash::Account.find_by_identifier(identifier)
+
+  splits = GnuCash::Split.where(account: root.deep_children)
+  transactions = GnuCash::Transaction.includes(:splits).where(guid: splits.map(&:tx_guid).uniq)
+
+  result = []
+
+  eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
+
+  transactions.each do |tx|
+    date = Time.strptime(tx.post_date, "%Y%m%d%H%M%S").in_time_zone('Europe/Paris').to_date
+    tx.splits.select{|s| s.memo != ''}.each do |split|
+      line = split.account.identifier
+      category = split.memo
+      sign = 1
+      if !line.starts_with?(identifier)
+        line = split.memo
+        category = split.account.identifier
+        sign = -1
+      else
+        line = line.split(':').last
+      end
+
+      shares = nil
+      if split.quantity_num != split.value_num
+        shares = Rational(sign * split.quantity_num, split.quantity_denom)
+      end
+
+      category.sub!(/^Expense:/, '')
+      category.sub!(/^Income:/, '')
+
+      line = case line
+      when "Long Terme"
+        "Spirit Euro ALT"
+      when "General"
+        "Spirit Euro Classique"
+      when "Euro Exclusif"
+        "Bourso Euro Exclusif"
+      else
+        line
+      end
+
+      fund = OpcvmFund.where(name: line).first || ScpiFund.where(name: line).first || EuroFund.where(name: line).first
+      raise "Can't find fund named #{line}" if fund.nil?
+      result << PortfolioTransaction.create(
+        fund: fund,
+        portfolio_id: id,
+        done_at: date,
+        shares: shares,
+        amount_original: Rational(sign * split.value_num, split.value_denom),
+        amount_currency: 'EUR',
+        amount_date: date,
+        category: category,
+      )
+    end
+  end
+
+  result
+end
