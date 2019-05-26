@@ -8,6 +8,11 @@ require 'net/http'
 Rails.application.load_tasks
 
 task daily: :environment do
+  # puts 'Importing transactions from Gnucash...'
+  # import_transactions_from_gnucash!(1, 'Bank Savings LT:Linxea:Vie')
+  # import_transactions_from_gnucash!(2, 'Bank Savings LT:Linxea:Spirit')
+  # import_transactions_from_gnucash!(3, 'Bank Savings CT:Boursorama:Vie')
+  # import_transactions_from_gnucash!(4, 'Bank Savings LT:Boursorama:PEA')
   puts 'Refreshing quotations...'
   refresh_quotations!
   puts 'Exporting excel files...'

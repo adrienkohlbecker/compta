@@ -4,7 +4,7 @@ class ScpiFund < ActiveRecord::Base
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def quotation_at(date)
-    Matview::OpcvmQuotationsFilled.where(date: date, opcvm_fund_id: id).first.value
+    Matview::OpcvmQuotationsFilledEur.where(date: date, opcvm_fund_id: id).first.value
   end
 
   def append_or_refresh_quotation(date, value)

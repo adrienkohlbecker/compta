@@ -3,7 +3,7 @@ def refresh_quotations!
   [Currency, OpcvmFund].map do |model|
     query = (model == OpcvmFund) ? model.where(closed: false) : model
     query.all.reverse.map do |item|
-      puts "refresh #{item.name}"
+      puts "refresh #{item.name} (#{item.try(:isin)})"
       item.refresh_data
       item.refresh_quotation_history
     end
