@@ -13,7 +13,7 @@ class PortfolioFormatter
 
     Matview::PortfolioHistory.where(date: date, portfolio_id: @portfiolio_ids).includes(:fund).each do |item|
       eq_percent = nil
-      tr = trs_for_rate.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type }
+      tr = trs_for_rate.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type && t.portfolio_id == item.portfolio_id }
       if tr.any? && !item.current_value.nil?
         eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1000)
       end
