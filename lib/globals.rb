@@ -20,7 +20,7 @@ def excel_export!(path)
     PortfolioFormatter.new(portfolio).excel("#{path}/#{portfolio.name}.xlsx")
   end
   puts 'excel: global'
-  PortfolioFormatter.new(Portfolio.all.pluck(:id)).excel("#{path}/Global.xlsx")
+  PortfolioFormatter.new(Portfolio.where.not(name: "Boursorama Vie").pluck(:id)).excel("#{path}/Global.xlsx")
   puts 'excel: Currencies'
   CommodityFormatter.new(Currency).excel("#{path}/Currencies.xlsx")
   puts 'excel: OPCVM'
