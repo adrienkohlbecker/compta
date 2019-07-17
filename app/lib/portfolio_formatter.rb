@@ -32,7 +32,14 @@ class PortfolioFormatter
         value: item.current_value,
         pv: item.pv,
         '%': item.percent,
-        'eq%': eq_percent
+        'eq%': eq_percent,
+        perf_1erjanv: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today.beginning_of_year) - 1).value rescue nil),
+        perf_1mois: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 1.month) - 1).value rescue nil),
+        perf_6mois: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 6.month) - 1).value rescue nil),
+        perf_1an: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 1.year) - 1).value rescue nil),
+        perf_2ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 2.years) - 1).value rescue nil),
+        perf_3ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 3.years) - 1).value rescue nil),
+        perf_5ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 5.years) - 1).value rescue nil)
       }
     end
 
@@ -73,12 +80,19 @@ class PortfolioFormatter
       item[:invested] = format('%11s', item[:invested])
       item[:pv] = format('%10s', item[:pv])
       item[:value] = format('%11s', item[:value])
+      item[:perf_1erjanv] = format('%6s', format('%.2f', (item[:perf_1erjanv] * 100).round(2))) unless item[:perf_1erjanv].nil?
+      item[:perf_1mois] = format('%6s', format('%.2f', (item[:perf_1mois] * 100).round(2))) unless item[:perf_1mois].nil?
+      item[:perf_6mois] = format('%6s', format('%.2f', (item[:perf_6mois] * 100).round(2))) unless item[:perf_6mois].nil?
+      item[:perf_1an] = format('%6s', format('%.2f', (item[:perf_1an] * 100).round(2))) unless item[:perf_1an].nil?
+      item[:perf_2ans] = format('%6s', format('%.2f', (item[:perf_2ans] * 100).round(2))) unless item[:perf_2ans].nil?
+      item[:perf_3ans] = format('%6s', format('%.2f', (item[:perf_3ans] * 100).round(2))) unless item[:perf_3ans].nil?
+      item[:perf_5ans] = format('%6s', format('%.2f', (item[:perf_5ans] * 100).round(2))) unless item[:perf_5ans].nil?
       item.delete(:kind)
       item.delete(:shareprice)
       item
     end
 
-    puts Hirb::Helpers::AutoTable.render(items)
+    puts Hirb::Helpers::AutoTable.render(items, max_width: 240)
     puts "Invested: #{situation[:invested]} / Current: #{situation[:current_value]} / PV: #{situation[:pv]} / %: #{(situation[:percent] * 100).round(2)} / eq%: #{(situation[:eq_percent] * 100).round(2)}"
   end
 
@@ -166,7 +180,7 @@ class PortfolioFormatter
     end
 
     wb.add_worksheet(name: 'Situation') do |sheet|
-      sheet.add_row ['PID', 'Kind', 'ID', 'Name', 'ISIN', 'Shares', 'Shareprice', 'Invested', 'Value', 'PV', 'Percent', 'Eq Pct']
+      sheet.add_row ['PID', 'Kind', 'ID', 'Name', 'ISIN', 'Shares', 'Shareprice', 'Invested', 'Value', 'PV', 'Percent', 'Eq Pct', 'Perf 1er janv', 'Perf 1 mois', 'Perf 6 mois', 'Perf 1 an', 'Perf 2 ans', 'Perf 3 ans', 'Perf 5 ans']
 
       items.each do |item|
         invested = item[:invested].nil? ? nil : item[:invested].value
@@ -174,8 +188,8 @@ class PortfolioFormatter
         value = item[:value].nil? ? nil : item[:value].value
         pv = item[:pv].nil? ? nil : item[:pv].value
 
-        sheet.add_row [item[:'#pid'], item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], shareprice, invested, value, pv, item[:'%'], item[:'eq%']],
-                      style: [nil, nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_currency, style_percent, style_percent]
+        sheet.add_row [item[:'#pid'], item[:kind], item[:'#id'], item[:name], item[:isin], item[:shares], shareprice, invested, value, pv, item[:'%'], item[:'eq%'], item[:perf_1erjanv], item[:perf_1mois], item[:perf_6mois], item[:perf_1an], item[:perf_2ans], item[:perf_3ans], item[:perf_5ans]],
+                      style: [nil, nil, nil, nil, nil, style_shares, style_currency, style_currency, style_currency, style_currency, style_percent, style_percent, style_percent, style_percent, style_percent, style_percent, style_percent, style_percent, style_percent]
       end
 
       sheet.auto_filter = 'A1:C1'
