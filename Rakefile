@@ -13,8 +13,13 @@ task daily: :environment do
   # import_transactions_from_gnucash!(2, 'Bank Savings LT:Linxea:Spirit')
   # import_transactions_from_gnucash!(3, 'Bank Savings CT:Boursorama:Vie')
   # import_transactions_from_gnucash!(4, 'Bank Savings LT:Boursorama:PEA')
+  # import_transactions_from_gnucash!(5, 'Bank Savings LT:Degiro')
   puts 'Refreshing quotations...'
   refresh_quotations!
+  puts 'refresh matview'
+  Matview::Base.refresh_all
+  puts 'gnucash prices'
+  GnuCash.refresh_from_quotations
   puts 'Exporting excel files...'
   excel_export!('/dropbox')
 end

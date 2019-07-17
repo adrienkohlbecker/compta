@@ -8,10 +8,6 @@ def refresh_quotations!
       item.refresh_quotation_history
     end
   end
-  puts 'refresh matview'
-  Matview::Base.refresh_all
-  puts 'gnucash prices'
-  GnuCash.refresh_from_quotations
 end
 
 def excel_export!(path)
