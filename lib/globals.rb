@@ -97,6 +97,8 @@ def import_transactions_from_gnucash!(id, identifier)
       category.sub!(/^Income:/, '')
 
       line = case line
+      when "Long Terme 2"
+        "Spirit Euro ALT"
       when "Long Terme"
         "Spirit Euro ALT"
       when "General"
