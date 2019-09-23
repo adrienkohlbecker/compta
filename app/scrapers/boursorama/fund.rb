@@ -5,7 +5,11 @@ class Boursorama::Fund
   VERSION = 1
 
   def initialize(boursorama_id, boursorama_type)
-    @uri = "https://www.boursorama.com/bourse/#{boursorama_type}/cours/#{boursorama_id}/"
+    if boursorama_type != 'action'
+      @uri = "https://www.boursorama.com/bourse/#{boursorama_type}/cours/#{boursorama_id}/"
+    else
+      @uri = "https://www.boursorama.com/cours/#{boursorama_id}/"
+    end
     @http = HTTPCache.new(@uri, key: :boursorama, expires_in: 3600 * 24)
   end
 
