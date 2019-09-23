@@ -12,3 +12,6 @@
 !/log/.keep
 /tmp
 /data
+
+# private quotes
+lib/private.rb

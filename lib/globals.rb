@@ -8,6 +8,7 @@ def refresh_quotations!
       item.refresh_quotation_history
     end
   end
+  private_quotations!
 end
 
 def excel_export!(path)
@@ -16,7 +17,7 @@ def excel_export!(path)
     PortfolioFormatter.new(portfolio).excel("#{path}/#{portfolio.name}.xlsx")
   end
   puts 'excel: global'
-  PortfolioFormatter.new(Portfolio.where.not(name: "Boursorama Vie").pluck(:id)).excel("#{path}/Global.xlsx")
+  PortfolioFormatter.new(Portfolio.where.not(name: ["Boursorama Vie", "Stock"]).pluck(:id)).excel("#{path}/Global.xlsx")
   puts 'excel: Currencies'
   CommodityFormatter.new(Currency).excel("#{path}/Currencies.xlsx")
   puts 'excel: OPCVM'
@@ -92,18 +93,10 @@ def import_transactions_from_gnucash!(id, identifier)
       category.sub!(/^Expense:/, '')
       category.sub!(/^Income:/, '')
 
-      line = case line
-      when "Long Terme 2"
-        "Spirit Euro ALT"
-      when "Long Terme"
-        "Spirit Euro ALT"
-      when "General"
-        "Spirit Euro Classique"
-      when "Euro Exclusif"
-        "Bourso Euro Exclusif"
-      else
-        line
-      end
+      line = private_aliases!(line)
+
+      amount = Rational(sign * split.value_num, split.value_denom)
+      amount = private_amounts!(split.account.identifier, amount)
 
       fund = OpcvmFund.where(name: line).first || ScpiFund.where(name: line).first || EuroFund.where(name: line).first
       raise "Can't find fund named #{line}" if fund.nil?
@@ -112,7 +105,7 @@ def import_transactions_from_gnucash!(id, identifier)
         portfolio_id: id,
         done_at: date,
         shares: shares,
-        amount_original: Rational(sign * split.value_num, split.value_denom),
+        amount_original: amount,
         amount_currency: 'EUR',
         amount_date: date,
         category: category,
