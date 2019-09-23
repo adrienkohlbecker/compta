@@ -55,7 +55,7 @@ class PortfolioFormatter
     invested = @portfiolio_ids.map{|id| Portfolio.find(id).invested_at(date)}.reduce(:+)
     pv = current_value - invested
     percent = (current_value / invested - 1).to_f
-    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1)
+    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1000)
 
     {
       current_value: current_value,

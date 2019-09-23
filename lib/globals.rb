@@ -63,7 +63,7 @@ def import_transactions_from_gnucash!(id, identifier)
 
   root = GnuCash::Account.find_by_identifier(identifier)
 
-  splits = GnuCash::Split.where(account: root.deep_children)
+  splits = GnuCash::Split.where(account: root.deep_children + [root])
   transactions = GnuCash::Transaction.includes(:splits).where(guid: splits.map(&:tx_guid).uniq)
 
   result = []

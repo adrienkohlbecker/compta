@@ -64,10 +64,11 @@ class InterestRate < ActiveRecord::Base
     end
 
     total_pv = 0
+    last = 0
     days_per_amount.each do |h|
-      total_pv += h[:amount].to_f * ((1 + rate.to_f)**(h[:days].to_f / h[:year_length].to_f) - 1)
+      last = (last + h[:amount]).to_f * ((1 + rate.to_f)**(h[:days].to_f / h[:year_length].to_f))
     end
 
-    total_pv + days_per_amount.last[:amount]
+    last
   end
 end
