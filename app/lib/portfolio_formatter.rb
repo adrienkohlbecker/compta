@@ -44,7 +44,7 @@ class PortfolioFormatter
     end
 
     items = items.sort do |a, b|
-      b[:invested] <=> a[:invested]
+      [ b[:%].nil? ? 0 : 1, b[:invested].to_f ] <=> [ a[:%].nil? ? 0 : 1, a[:invested].to_f ]
     end
 
     current_value = Amount.new(0, 'EUR', date)
