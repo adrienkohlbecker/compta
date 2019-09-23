@@ -37,34 +37,24 @@ class InterestRate < ActiveRecord::Base
     amount_by_day = amount_by_day.sort_by { |h| h[:date] }
 
     dates_per_amount = []
+    days_per_amount = []
+    last = 0
     (1..amount_by_day.length).each do |i|
       from = amount_by_day[i - 1][:date]
       to = (i == amount_by_day.length) ? current_date : amount_by_day[i][:date]
       amount = amount_by_day[i - 1][:value]
 
-      dates_per_amount << { from: from, to: to, amount: amount }
-    end
-
-    days_per_amount = []
-    dates_per_amount.each do |h|
-      from = h[:from]
-      to = h[:to]
+      last += amount
 
       (from.year..to.year).each do |y|
-        from = (h[:from].year == y) ? h[:from] : from.beginning_of_year
-        to = (h[:to].year == y) ? h[:to] : from.end_of_year + 1
+        from = (from.year == y) ? from : from.beginning_of_year
+        to = (to.year == y) ? to : from.end_of_year + 1
         year_length = 1 + (Date.new(y, 1, 1).end_of_year - Date.new(y, 1, 1))
 
-        days_per_amount << { days: to - from, amount: h[:amount], year_length: year_length }
+        last = (last).to_f * ((1 + rate.to_f)**((to - from).to_f / year_length.to_f))
 
         from = to
       end
-    end
-
-    total_pv = 0
-    last = 0
-    days_per_amount.each do |h|
-      last = (last + h[:amount]).to_f * ((1 + rate.to_f)**(h[:days].to_f / h[:year_length].to_f))
     end
 
     last
