@@ -15,7 +15,7 @@ class PortfolioFormatter
       eq_percent = nil
       tr = trs_for_rate.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type && t.portfolio_id == item.portfolio_id }
       if tr.any? && !item.current_value.nil?
-        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1000)
+        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 1000, date)
       end
 
       next if item.invested.nil?
@@ -33,13 +33,13 @@ class PortfolioFormatter
         pv: item.pv,
         '%': item.percent,
         'eq%': eq_percent,
-        perf_1erjanv: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today.beginning_of_year) - 1).value rescue nil),
-        perf_1mois: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 1.month) - 1).value rescue nil),
-        perf_6mois: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 6.month) - 1).value rescue nil),
-        perf_1an: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 1.year) - 1).value rescue nil),
-        perf_2ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 2.years) - 1).value rescue nil),
-        perf_3ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 3.years) - 1).value rescue nil),
-        perf_5ans: item.shareprice.nil? ? nil : ((item.shareprice / item.fund.quotation_at(Date.today - 5.years) - 1).value rescue nil)
+        perf_1erjanv: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date.beginning_of_year) - 1).value rescue nil),
+        perf_1mois: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 1.month) - 1).value rescue nil),
+        perf_6mois: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 6.month) - 1).value rescue nil),
+        perf_1an: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 1.year) - 1).value rescue nil),
+        perf_2ans: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 2.years) - 1).value rescue nil),
+        perf_3ans: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 3.years) - 1).value rescue nil),
+        perf_5ans: item.shareprice.nil? ? nil : ((item.fund.quotation_at(date) / item.fund.quotation_at(date - 5.years) - 1).value rescue nil)
       }
     end
 
@@ -55,7 +55,7 @@ class PortfolioFormatter
     invested = @portfiolio_ids.map{|id| Portfolio.find(id).invested_at(date)}.reduce(:+)
     pv = current_value - invested
     percent = (current_value / invested - 1).to_f
-    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1000)
+    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1000, date)
 
     {
       current_value: current_value,

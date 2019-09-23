@@ -16,33 +16,31 @@
 class InterestRate < ActiveRecord::Base
   belongs_to :object, polymorphic: true
 
-  def self.equivalent_rate(transactions, current_value, lower_bound, upper_bound, max_iter = 300)
+  def self.equivalent_rate(transactions, current_value, lower_bound, upper_bound, current_date, max_iter = 300)
     raise 'Maximum iterations reached' if max_iter == 0
 
     candidate = (lower_bound + upper_bound) / 2.0
-    total = compute_interest(transactions, candidate)
+    total = compute_interest(transactions, candidate, current_date)
     delta = total - current_value
 
     return candidate if delta < 0.001 && delta > - 0.001
 
     if delta < 0
-      return equivalent_rate(transactions, current_value, candidate, upper_bound, max_iter - 1)
+      return equivalent_rate(transactions, current_value, candidate, upper_bound, current_date, max_iter - 1)
     else
-      return equivalent_rate(transactions, current_value, lower_bound, candidate, max_iter - 1)
+      return equivalent_rate(transactions, current_value, lower_bound, candidate, current_date, max_iter - 1)
     end
   end
 
-  def self.compute_interest(transactions, rate)
+  def self.compute_interest(transactions, rate, current_date)
     amount_by_day = transactions.group_by(&:done_at).map { |date, ts| { date: date, value: ts.map(&:amount_original).reduce(:+) } }
     amount_by_day = amount_by_day.sort_by { |h| h[:date] }
 
-    running_total = 0
     dates_per_amount = []
     (1..amount_by_day.length).each do |i|
       from = amount_by_day[i - 1][:date]
-      to = (i == amount_by_day.length) ? Date.today : amount_by_day[i][:date]
-      amount = running_total + amount_by_day[i - 1][:value]
-      running_total += amount_by_day[i - 1][:value]
+      to = (i == amount_by_day.length) ? current_date : amount_by_day[i][:date]
+      amount = amount_by_day[i - 1][:value]
 
       dates_per_amount << { from: from, to: to, amount: amount }
     end
