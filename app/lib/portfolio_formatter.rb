@@ -49,13 +49,13 @@ class PortfolioFormatter
 
     current_value = Amount.new(0, 'EUR', date)
     items.each do |h|
-      current_value += h[:value] || 0
+      current_value += h[:value] || Amount.new(0, 'EUR', date)
     end
 
     invested = @portfiolio_ids.map{|id| Portfolio.find(id).invested_at(date)}.reduce(:+)
     pv = current_value - invested
-    percent = (current_value / invested - 1).to_f
-    eq_percent = InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1000, date)
+    percent = invested == 0 ? Amount.new(0, 'EUR', date) : (current_value / invested - 1).to_f
+    eq_percent = items.empty? ? 0 : InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 1000, date)
 
     {
       current_value: current_value,
@@ -128,7 +128,7 @@ class PortfolioFormatter
 
   def list_performance(start_date = nil)
     if start_date.nil?
-      start_date = PortfolioTransaction.where(portfolio_id: @portfiolio_ids).order('done_at ASC').first.done_at
+      start_date = PortfolioTransaction.where(portfolio_id: @portfiolio_ids).order('done_at ASC').first.try(:done_at) || Date.today
     end
     end_date = Date.today
 

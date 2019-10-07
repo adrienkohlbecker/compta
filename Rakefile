@@ -15,6 +15,8 @@ task daily: :environment do
   # import_transactions_from_gnucash!(4, 'Bank Savings LT:Boursorama:PEA')
   # import_transactions_from_gnucash!(5, 'Bank Savings LT:Degiro')
   # import_transactions_from_gnucash!(6, 'Stock')
+  # import_transactions_from_gnucash!(7, 'Bank Savings LT:Coinbase')
+  # import_transactions_from_gnucash!(8, 'Bank Savings LT:Linxea:Avenir')
   puts 'Refreshing quotations...'
   refresh_quotations!
   puts 'refresh matview'

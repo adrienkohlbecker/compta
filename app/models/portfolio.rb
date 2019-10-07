@@ -18,6 +18,6 @@ class Portfolio < ActiveRecord::Base
   end
 
   def invested_at(date)
-    transactions.where(category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where('done_at <= ?', date).map { |t| t.amount.to_eur }.reduce(:+) || 0
+    transactions.where(category: PortfolioTransaction::CATEGORY_FOR_INVESTED).where('done_at <= ?', date).map { |t| t.amount.to_eur }.reduce(:+) || Amount.new(0, 'EUR', date)
   end
 end
