@@ -374,8 +374,8 @@ CREATE VIEW public.view_opcvm_quotations_filled AS
             opcvm_quotations.value_currency,
             opcvm_quotations.value_date
            FROM public.opcvm_quotations
-          WHERE ((opcvm_quotations.opcvm_fund_id = t_opcvm_funds.id) AND (opcvm_quotations.date >= date_series.date_series))
-          ORDER BY opcvm_quotations.date
+          WHERE ((opcvm_quotations.opcvm_fund_id = t_opcvm_funds.id) AND (opcvm_quotations.date <= date_series.date_series))
+          ORDER BY opcvm_quotations.date DESC
          LIMIT 1) t_values ON (true))
 UNION
  SELECT t_opcvm_funds.id AS opcvm_fund_id,
@@ -1571,4 +1571,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180603215505');
 INSERT INTO schema_migrations (version) VALUES ('20190923194249');
 
 INSERT INTO schema_migrations (version) VALUES ('20190923200311');
+
+INSERT INTO schema_migrations (version) VALUES ('20191010190958');
 
