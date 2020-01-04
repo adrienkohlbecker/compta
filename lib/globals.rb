@@ -11,6 +11,19 @@ def refresh_quotations!
   private_quotations!
 end
 
+def import_transactions!
+  import_transactions_from_gnucash!(1, 'Bank Savings LT:Linxea:Vie')
+  import_transactions_from_gnucash!(2, 'Bank Savings LT:Linxea:Spirit')
+  import_transactions_from_gnucash!(3, 'Bank Savings CT:Boursorama:Vie')
+  import_transactions_from_gnucash!(4, 'Bank Savings LT:Boursorama:PEA')
+  import_transactions_from_gnucash!(5, 'Bank Savings LT:Degiro')
+  import_transactions_from_gnucash!(6, 'Stock')
+  import_transactions_from_gnucash!(7, 'Bank Savings LT:Coinbase')
+  import_transactions_from_gnucash!(8, 'Bank Savings LT:Linxea:Avenir')
+  import_transactions_from_gnucash!(9, 'Bank Savings LT:Amundi')
+  import_transactions_from_gnucash!(10, 'Bank Savings LT:Interactive Brokers')
+end
+
 def excel_export!(path)
   Portfolio.all.map do |portfolio|
     puts "excel: #{portfolio.name}"
@@ -72,7 +85,13 @@ def import_transactions_from_gnucash!(id, identifier)
   eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
 
   transactions.each do |tx|
-    date = Time.strptime(tx.post_date, "%Y%m%d%H%M%S").in_time_zone('Europe/Paris').to_date
+    date_format = if tx.post_date.length == 14
+               "%Y%m%d%H%M%S"
+             else
+               "%Y-%m-%d %H:%M:%S"
+             end
+
+    date = Time.strptime(tx.post_date, date_format).in_time_zone('Europe/Paris').to_date
     tx.splits.select{|s| s.memo != ''}.each do |split|
       line = split.account.identifier
       category = split.memo

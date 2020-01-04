@@ -32,7 +32,8 @@ class GnuCash::Account < GnuCash::Base
     @@identifier_index ||= {}
 
     if @@identifier_index.has_key?(guid)
-      return @@identifier_index[guid]
+      # make a copy otherwise this is passed by reference
+      return @@identifier_index[guid].dup
     end
 
     if account_type == "ROOT"
@@ -44,7 +45,8 @@ class GnuCash::Account < GnuCash::Base
 
     @@identifier_index[guid] = result
 
-    result
+    # make a copy otherwise this is passed by reference
+    result.dup
   end
 
   def deep_children

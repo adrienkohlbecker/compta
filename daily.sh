@@ -32,6 +32,7 @@ docker-compose --file=/Users/ak/Work/compta/docker-compose.yml run --rm main rak
 echo "Backing up raw data..."
 docker-compose --file=/Users/ak/Work/compta/docker-compose.yml run --rm pg_dump --format=p --verbose --encoding=UTF-8 --no-owner --no-privileges --inserts --dbname=compta_development --file="/dropbox/backups/$(date +%d).sql"
 
+rm -f /Users/ak/Work/compta/log/development.log
 
 echo "Notify Deadmansnitch..."
 curl "https://nosnch.in/2f07697414"

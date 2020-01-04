@@ -18,6 +18,8 @@ class OpcvmFund < ActiveRecord::Base
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
   def refresh_data
+    return if isin == "QS0009118918" # fcpe not on boursorama
+
     data = Boursorama::Fund.new(boursorama_id, boursorama_type).export
 
     self.isin = data[:isin]
@@ -28,7 +30,11 @@ class OpcvmFund < ActiveRecord::Base
 
   def refresh_quotation_history
     transaction do
-      history = Boursorama::QuotationHistory.new(boursorama_id).quotation_history
+      if isin == "QS0009118918" # fcpe not on boursorama
+        history = CSV.parse(HTTPCache.new('https://www.eres-group.com/eres/new_fiche_export.php?id=990000118919&format=CSV').get, col_sep: ';').map{|r| [Date.parse(r[2]), BigDecimal.new(r[3])]}
+      else
+        history = Boursorama::QuotationHistory.new(boursorama_id).quotation_history
+      end
 
       history.each do |date, value|
         append_or_refresh_quotation(date, value)
