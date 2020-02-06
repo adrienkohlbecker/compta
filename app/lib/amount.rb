@@ -7,7 +7,13 @@ class Amount < BigDecimal
   end
 
   def initialize(value, currency, at)
-    super(value)
+    if value.is_a?(Rational) || value.is_a?(Float)
+      precision = value.to_f.to_s.size - 1
+      super(value, precision)
+    else
+      super(value)
+    end
+
     @value = value
     @currency = currency
     @at = at

@@ -14,7 +14,7 @@ end
 def import_transactions!
   import_transactions_from_gnucash!(1, 'Bank Savings LT:Linxea:Vie')
   import_transactions_from_gnucash!(2, 'Bank Savings LT:Linxea:Spirit')
-  import_transactions_from_gnucash!(3, 'Bank Savings CT:Boursorama:Vie')
+  import_transactions_from_gnucash!(3, 'Bank Savings LT:Boursorama:Vie')
   import_transactions_from_gnucash!(4, 'Bank Savings LT:Boursorama:PEA')
   import_transactions_from_gnucash!(5, 'Bank Savings LT:Degiro')
   import_transactions_from_gnucash!(6, 'Stock')
@@ -22,6 +22,7 @@ def import_transactions!
   import_transactions_from_gnucash!(8, 'Bank Savings LT:Linxea:Avenir')
   import_transactions_from_gnucash!(9, 'Bank Savings LT:Amundi')
   import_transactions_from_gnucash!(10, 'Bank Savings LT:Interactive Brokers')
+  import_transactions_from_gnucash!(11, 'Bank Savings LT:Homunity')
 end
 
 def excel_export!(path)
@@ -30,7 +31,7 @@ def excel_export!(path)
     PortfolioFormatter.new(portfolio).excel("#{path}/#{portfolio.name}.xlsx")
   end
   puts 'excel: global'
-  PortfolioFormatter.new(Portfolio.where.not(name: ["Boursorama Vie", "Stock"]).pluck(:id)).excel("#{path}/Global.xlsx")
+  PortfolioFormatter.new(Portfolio.where.not(name: ["Stock"]).pluck(:id)).excel("#{path}/Global.xlsx")
   puts 'excel: Currencies'
   CommodityFormatter.new(Currency).excel("#{path}/Currencies.xlsx")
   puts 'excel: OPCVM'
@@ -116,6 +117,13 @@ def import_transactions_from_gnucash!(id, identifier)
 
       amount = Rational(sign * split.value_num, split.value_denom)
       amount = private_amounts!(split.account.identifier, amount)
+
+      if category.end_with?(':USD') || split.account.identifier == "Bank Savings LT:Interactive Brokers:Stock:Datadog"
+        amount = Amount.new(amount, 'USD', date).to_eur.value
+      end
+      if category.end_with?(':USD')
+        category = category.rpartition(':').first
+      end
 
       fund = OpcvmFund.where(name: line).first || ScpiFund.where(name: line).first || EuroFund.where(name: line).first
       raise "Can't find fund named #{line}" if fund.nil?

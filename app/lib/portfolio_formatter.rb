@@ -15,7 +15,7 @@ class PortfolioFormatter
       eq_percent = nil
       tr = trs_for_rate.select { |t| t.fund_id == item.fund_id && t.fund_type == item.fund_type && t.portfolio_id == item.portfolio_id }
       if tr.any? && !item.current_value.nil?
-        eq_percent = InterestRate.equivalent_rate(tr, item.current_value, -1, 10000, date)
+        eq_percent = (InterestRate.equivalent_rate(tr, item.current_value, -1, 10000, date) rescue 0)
       end
 
       next if item.invested.nil?
@@ -55,7 +55,7 @@ class PortfolioFormatter
     invested = @portfiolio_ids.map{|id| Portfolio.find(id).invested_at(date)}.reduce(:+)
     pv = current_value - invested
     percent = invested == 0 ? Amount.new(0, 'EUR', date) : (current_value / invested - 1).to_f
-    eq_percent = items.empty? ? 0 : InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 10000, date)
+    eq_percent = items.empty? ? 0 : (InterestRate.equivalent_rate(trs_for_rate, current_value, -1, 10000, date) rescue 0)
 
     {
       current_value: current_value,
@@ -144,7 +144,14 @@ class PortfolioFormatter
       }
     end
 
-    items.group_by{|i| i[:date]}.map{|d, vs| {date: d, invested: vs.map{|i| i[:invested]}.reduce(&:+), value: vs.map{|i| i[:value]}.reduce(&:+), pv: vs.map{|i| i[:pv]}.reduce(&:+)}}
+    items.group_by{|i| i[:date]}.map do |d, vs|
+      {
+        date: d,
+        invested: vs.map{|i| i[:invested]}.reduce(&:+),
+        value: vs.map{|i| i[:value] || Amount.new(0, 'EUR', d)}.reduce(&:+) ,
+        pv: vs.map{|i| i[:pv]}.reduce(&:+)
+      }rescue (binding.pry)
+    end
   end
 
   def print_performance(start_date = nil)
