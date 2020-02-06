@@ -23,6 +23,7 @@ def import_transactions!
   import_transactions_from_gnucash!(9, 'Bank Savings LT:Amundi')
   import_transactions_from_gnucash!(10, 'Bank Savings LT:Interactive Brokers')
   import_transactions_from_gnucash!(11, 'Bank Savings LT:Homunity')
+  import_transactions_from_gnucash!(12, 'Bank Savings LT:Brand New Day')
 end
 
 def excel_export!(path)

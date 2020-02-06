@@ -9,10 +9,12 @@ class HTTPCache
     end
   end
 
-  def initialize(uri, key: :default, expires_in: 3600)
+  def initialize(uri, method: :get, body: nil, key: :default, expires_in: 3600)
     @uri = uri
     @key = key
     @expires_in = expires_in
+    @method = method
+    @body = body
   end
 
   def cached?
@@ -40,12 +42,21 @@ class HTTPCache
   end
 
   private def fetch_response
-    HTTParty.get(@uri, headers: { 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.43 Safari/537.36' })
+    options = {
+      headers: { 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.43 Safari/537.36' }
+    }
+
+    unless @body.nil?
+      options[:body] = @body
+    end
+
+    HTTParty.send(@method.to_sym, @uri, options)
   end
 
   private def cache_key_name
     uri_hash = Digest::MD5.hexdigest(@uri)
-    "httpcache:#{@key}:#{uri_hash}"
+    body_hash = Digest::MD5.hexdigest(@body.to_json)
+    "httpcache:#{@key}:#{uri_hash}:#{body_hash}"
   end
 
   private def response_body_from_cache

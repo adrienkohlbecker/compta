@@ -32,6 +32,8 @@ class OpcvmFund < ActiveRecord::Base
     transaction do
       if isin == "QS0009118918" # fcpe not on boursorama
         history = CSV.parse(HTTPCache.new('https://www.eres-group.com/eres/new_fiche_export.php?id=990000118919&format=CSV').get, col_sep: ';').map{|r| [Date.parse(r[2]), BigDecimal.new(r[3])]}
+      elsif !bnd_fund_id.nil?
+        history = BND::QuotationHistory.new(bnd_fund_id).quotation_history
       else
         history = Boursorama::QuotationHistory.new(boursorama_id).quotation_history
       end

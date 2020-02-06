@@ -344,7 +344,8 @@ CREATE TABLE public.opcvm_funds (
     currency character varying,
     closed boolean DEFAULT false NOT NULL,
     closed_date date,
-    boursorama_type character varying
+    boursorama_type character varying,
+    bnd_fund_id integer
 );
 
 
@@ -1573,4 +1574,6 @@ INSERT INTO schema_migrations (version) VALUES ('20190923194249');
 INSERT INTO schema_migrations (version) VALUES ('20190923200311');
 
 INSERT INTO schema_migrations (version) VALUES ('20191010190958');
+
+INSERT INTO schema_migrations (version) VALUES ('20200206164049');
 
