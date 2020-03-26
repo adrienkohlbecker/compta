@@ -8,14 +8,5 @@ require 'net/http'
 Rails.application.load_tasks
 
 task daily: :environment do
-  # puts 'Importing transactions from Gnucash...'
-  # import_transactions!
-  puts 'Refreshing quotations...'
-  refresh_quotations!
-  puts 'refresh matview'
-  Matview::Base.refresh_all
-  puts 'gnucash prices'
-  GnuCash.refresh_from_quotations
-  puts 'Exporting excel files...'
-  excel_export!('/dropbox')
+  task_daily!
 end

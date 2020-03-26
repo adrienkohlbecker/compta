@@ -14,7 +14,7 @@ class BND::QuotationHistory
       'filter' => '',
       'fundId' => fundId,
       'startDate' => '01-01-2010',
-      'endDate' => '06-02-2020',
+      'endDate' => Date.today.strftime('%d-%m-%Y'),
     }
     @http = HTTPCache.new(@uri, method: :post, body: body, key: :bnd, expires_in: 3600 * 24)
     @fundId = fundId

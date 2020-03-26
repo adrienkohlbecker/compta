@@ -908,7 +908,7 @@ CREATE VIEW public.view_portfolio_history AS
     history.portfolio_id,
     (
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
+            WHEN (abs(history.shares) < 0.1) THEN NULL::numeric
             ELSE history.shares
         END)::numeric(15,5) AS shares,
     history.invested_original,
@@ -916,46 +916,46 @@ CREATE VIEW public.view_portfolio_history AS
     history.invested_date,
     (
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
+            WHEN (abs(history.shares) < 0.1) THEN NULL::numeric
             ELSE history.current_value_original
         END)::numeric(15,5) AS current_value_original,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            WHEN (abs(history.shares) < 0.1) THEN NULL::character varying
             ELSE history.current_value_currency
         END AS current_value_currency,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            WHEN (abs(history.shares) < 0.1) THEN NULL::date
             ELSE history.current_value_date
         END AS current_value_date,
     (
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN (- history.invested_original)
+            WHEN (abs(history.shares) < 0.1) THEN (- history.invested_original)
             ELSE (history.current_value_original - history.invested_original)
         END)::numeric(15,5) AS pv_original,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            WHEN (abs(history.shares) < 0.1) THEN NULL::character varying
             ELSE history.current_value_currency
         END AS pv_currency,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            WHEN (abs(history.shares) < 0.1) THEN NULL::date
             ELSE history.current_value_date
         END AS pv_date,
     (
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
+            WHEN (abs(history.shares) < 0.1) THEN NULL::numeric
             ELSE history.shareprice_original
         END)::numeric(15,5) AS shareprice_original,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::character varying
+            WHEN (abs(history.shares) < 0.1) THEN NULL::character varying
             ELSE history.shareprice_currency
         END AS shareprice_currency,
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::date
+            WHEN (abs(history.shares) < 0.1) THEN NULL::date
             ELSE history.shareprice_date
         END AS shareprice_date,
     (
         CASE
-            WHEN (abs(history.shares) < 0.001) THEN NULL::numeric
+            WHEN (abs(history.shares) < 0.1) THEN NULL::numeric
             WHEN (history.invested_original = (0)::numeric) THEN NULL::numeric
             ELSE ((history.current_value_original / history.invested_original) - (1)::numeric)
         END)::numeric(15,5) AS percent
@@ -1576,4 +1576,6 @@ INSERT INTO schema_migrations (version) VALUES ('20190923200311');
 INSERT INTO schema_migrations (version) VALUES ('20191010190958');
 
 INSERT INTO schema_migrations (version) VALUES ('20200206164049');
+
+INSERT INTO schema_migrations (version) VALUES ('20200318102800');
 

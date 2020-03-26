@@ -17,21 +17,23 @@ class OpcvmFund < ActiveRecord::Base
   has_many :quotations_filled_eur, -> { where.not(value_original: nil).order(date: :desc) }, class_name: 'Matview::OpcvmQuotationsFilledEur'
   has_many :transactions, class_name: 'PortfolioTransaction', as: :fund
 
-  def refresh_data
-    return if isin == "QS0009118918" # fcpe not on boursorama
+  # def refresh_data
+  #   return if isin == "QS0009118918" # fcpe not on boursorama
 
-    data = Boursorama::Fund.new(boursorama_id, boursorama_type).export
+  #   data = Boursorama::Fund.new(boursorama_id, boursorama_type).export
 
-    self.isin = data[:isin]
-    self.name = data[:name]
-    self.currency = data[:currency]
-    save!
-  end
+  #   self.isin = data[:isin]
+  #   self.name = data[:name]
+  #   self.currency = data[:currency]
+  #   save!
+  # end
 
   def refresh_quotation_history
     transaction do
       if isin == "QS0009118918" # fcpe not on boursorama
         history = CSV.parse(HTTPCache.new('https://www.eres-group.com/eres/new_fiche_export.php?id=990000118919&format=CSV').get, col_sep: ';').map{|r| [Date.parse(r[2]), BigDecimal.new(r[3])]}
+      elsif isin == "QS0009118421" # fcpe not on boursorama
+        history = CSV.parse(HTTPCache.new('https://www.eres-group.com/eres/new_fiche_export.php?id=990000118429&format=CSV').get, col_sep: ';').map{|r| [Date.parse(r[2]), BigDecimal.new(r[3])]}
       elsif !bnd_fund_id.nil?
         history = BND::QuotationHistory.new(bnd_fund_id).quotation_history
       else

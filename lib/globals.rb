@@ -1,14 +1,30 @@
 # frozen_string_literal: true
+
+def task_daily!
+  # puts 'Importing transactions from Gnucash...'
+  # import_transactions!
+  puts 'Refreshing quotations...'
+  refresh_quotations!
+  puts 'refresh matview'
+  Matview::Base.refresh_all
+  puts 'gnucash prices'
+  GnuCash.refresh_from_quotations
+  puts 'Exporting excel files...'
+  excel_export!('/dropbox')
+end
+
 def refresh_quotations!
   [Currency, OpcvmFund].map do |model|
     query = (model == OpcvmFund) ? model.where(closed: false) : model
     query.all.reverse.map do |item|
       puts "refresh #{item.name} (#{item.try(:isin)})"
-      item.refresh_data
+      # item.refresh_data
       item.refresh_quotation_history
     end
   end
   private_quotations!
+  refresh_portfolio_xml_prices!("/dropbox/Portfolio Performance/portfolio.xml")
+  refresh_portfolio_xml_prices!("/dropbox/Portfolio Performance/portfolio-before-covid.xml")
 end
 
 def import_transactions!
@@ -114,12 +130,16 @@ def import_transactions_from_gnucash!(id, identifier)
       category.sub!(/^Expense:/, '')
       category.sub!(/^Income:/, '')
 
+      if split.account.identifier == 'Stock:Datadog:IB' || split.account.identifier == 'Stock:Datadog:AST'
+        line = 'Datadog'
+      end
+
       line = private_aliases!(line)
 
       amount = Rational(sign * split.value_num, split.value_denom)
-      amount = private_amounts!(split.account.identifier, amount)
+      amount = private_amounts!(split.account.identifier, amount, date)
 
-      if category.end_with?(':USD') || split.account.identifier == "Bank Savings LT:Interactive Brokers:Stock:Datadog"
+      if category.end_with?(':USD')
         amount = Amount.new(amount, 'USD', date).to_eur.value
       end
       if category.end_with?(':USD')
@@ -142,4 +162,50 @@ def import_transactions_from_gnucash!(id, identifier)
   end
 
   result
+end
+
+def with_portfolio_xml(filename)
+  doc = File.open(filename) { |f| Nokogiri::XML(f) }
+  doc.encoding = 'UTF-8'
+
+  yield doc
+
+  File.write(filename, doc.to_xml)
+end
+
+def refresh_portfolio_xml_prices!(filename)
+  with_portfolio_xml(filename) do |doc|
+    OpcvmFund.where.not(name: ["Bitcoin", "Ethereum", "Litecoin", "Gitlab", "NUMA Crowd"]).find_each do |fund|
+      security = doc.css('security').find{|n| n.css('> name').text() == fund.name.gsub('&', '') }
+      if security.nil?
+        raise "unable to find #{fund.name}"
+      end
+
+      prices = security.css('prices').first
+      prices.css('price').remove
+
+      fund.quotations.reverse.each do |q|
+        prices.add_child(%(<price t="#{q.date.strftime('%Y-%m-%d')}" v="#{(q.value_original * 10000).to_i}"/>))
+      end
+    end
+
+    {
+      "mBTC" => "Bitcoin",
+      "mETH" => "Ethereum",
+      "mLTC" => "Litecoin"
+    }.each do |symbol, name|
+      fund = Currency.find_by(name: symbol)
+      security = doc.css('security').find{|n| n.css('> name').text() == name.gsub('&', '') }
+      if security.nil?
+        raise "unable to find #{name}"
+      end
+
+      prices = security.css('prices').first
+      prices.css('price').remove
+
+      fund.quotations.reverse.each do |q|
+        prices.add_child(%(<price t="#{q.date.strftime('%Y-%m-%d')}" v="#{((1 / q.value) * 10000).to_i}"/>))
+      end
+    end
+  end
 end
