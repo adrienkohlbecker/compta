@@ -388,3 +388,25 @@ end
 #     ))
 #   end
 # end
+
+# with_portfolio_xml("/dropbox/Portfolio Performance/portfolio.xml") do |doc|
+#   # OpcvmFund.find_each do |fund|
+#   #   security = doc.css('security').find{|n| n.css('> name').text() == fund.name.gsub('&', '') }
+#   #   if security.nil?
+#   #     raise "unable to find #{fund.name}"
+#   #   end
+
+#   #   if fund.boursorama_id
+#   #     security.css('feed').remove
+#   #     security.add_child(%(
+#   #       <feed>GENERIC-JSON</feed>
+#   #     ))
+#   #   end
+#   # end
+#   doc.css('security').each do |security|
+#     puts security.css('> name').text()
+#     if security.css('feed').length != 1
+#       raise security
+#     end
+#   end
+# end
