@@ -10,7 +10,8 @@ def task_daily!
   puts 'gnucash prices'
   GnuCash.refresh_from_quotations
   puts 'Exporting excel files...'
-  excel_export!('/dropbox')
+  export_values('/dropbox/Situation.xlsx')
+  # excel_export!('/dropbox/old')
 end
 
 def refresh_quotations!
@@ -206,4 +207,93 @@ def refresh_portfolio_xml_prices!(filename)
       end
     end
   end
+end
+
+def gnucash_value(identifier)
+  eur_funds = {}
+  root = GnuCash::Account.find_by_identifier(identifier)
+  splits = GnuCash::Split.where(account: root.deep_children + [root]).includes(account: :commodity)
+  commodities_and_values = splits.map do |s|
+    commodity = if s.account.identifier.include?(":Fonds Euro:")
+      eur_funds[s.account.name] ||= GnuCash::Commodity.new(mnemonic: "EUR", fullname: s.account.name, quote_source: "currency")
+    else
+      s.account.commodity
+    end
+    [commodity, Rational(s.quantity_num, s.quantity_denom)]
+  end
+
+  commodity_to_values = commodities_and_values.group_by{|item| item[0]}
+  commodity_to_value = commodity_to_values.map { |commodity, tuples| [commodity, tuples.map{|tuple| tuple[1]}.reduce(:+)] }
+  nonzero_commodities = commodity_to_value.select{|tuple| tuple[1].abs > 0.1}
+
+  eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
+
+  with_prices = nonzero_commodities.map do |c,v|
+    price = if c.mnemonic == "EUR"
+              1
+            else
+              price = c.prices.where(source: 'user:price-editor').order('date DESC').limit(1).first
+              raise "can't find #{c.to_json}" if price.nil?
+              change = if price.currency_guid != eur_currency.guid
+                         currency_price = GnuCash::Price.where(commodity_guid: price.currency_guid, currency_guid: eur_currency.guid).where(source: 'user:price-editor').order('date DESC').limit(1).first
+                         raise "can't find #{price.to_json}" if currency_price.nil?
+                         Rational(currency_price.value_num, currency_price.value_denom)
+                       else
+                         1
+                       end
+              Rational(price.value_num, price.value_denom) * change
+            end
+
+    isin = c.quote_source == "currency" ? c.mnemonic : c.cusip
+    [identifier, c.fullname, isin, v.to_f.round(2), price.to_f.round(5), v*price.to_f.round(2)]
+  end
+end
+
+def export_values(path = "./Situation.xlsx")
+
+  situation = [
+    'Bank Savings LT:Amundi',
+    'Bank Savings LT:Boursorama:PEA',
+    'Bank Savings LT:Boursorama:PEA PME',
+    'Bank Savings LT:Boursorama:PEL',
+    'Bank Savings LT:Boursorama:Vie',
+    'Bank Savings LT:Brand New Day',
+    'Bank Savings LT:Coinbase',
+    'Bank Savings LT:Degiro',
+    'Bank Savings LT:Homunity',
+    'Bank Savings LT:Interactive Brokers',
+    'Bank Savings LT:Linxea:Avenir',
+    'Bank Savings LT:Linxea:Spirit',
+    'Bank Savings LT:Linxea:Vie',
+    'Stock',
+  ].map { |identifier| gnucash_value(identifier) }.reduce(:+)
+
+  p = Axlsx::Package.new
+  wb = p.workbook
+
+  style_currency = wb.styles.add_style format_code: '# ##0.00 €;[Red]- # ##0.00 €'
+  style_shares = wb.styles.add_style format_code: '0.00000;[Red]- 0.00000'
+
+  wb.add_worksheet(name: 'Situation') do |sheet|
+    sheet.add_row ['Account', 'Name', 'ISIN', 'Shares', 'Price', 'Value']
+
+    situation.each do |item|
+      sheet.add_row [item[0], item[1], item[2], item[3], item[4], item[5]],
+                    style: [nil, nil, nil, style_shares, style_currency, style_currency]
+    end
+
+    sheet.auto_filter = 'A1:C1'
+  end
+
+  wb.add_worksheet(name: 'Accounts') do |sheet|
+    sheet.add_row ['Account', 'Value']
+
+    situation.group_by { |item| item[0] }.each_with_object([]) { |(account, items), a| a << [account, items.map{|item| item[5]}.reduce(:+)]}.each do |item|
+      sheet.add_row [item[0], item[1]],
+                    style: [nil, style_currency]
+    end
+  end
+
+  p.serialize path
+
 end
