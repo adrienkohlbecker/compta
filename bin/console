@@ -6,6 +6,7 @@ IFS=$'\n\t'
 docker build -t compta .
 docker run -ti --rm \
   -v $(pwd):/app \
+  -v $HOME/Dataroom/Compta:/dataroom \
   -v $HOME/.pryrc:/root/.pryrc \
   -v $HOME/.pry_history:/root/.pry_history \
   compta \
