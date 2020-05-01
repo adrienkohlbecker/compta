@@ -20,12 +20,15 @@ module GnuCash
       commodity = fund.gnucash_commodity
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
+      currency = GnuCash::Commodity.where(mnemonic: fund.currency).first
+      raise "Could not find currency for fund #{fund.name}" if currency.nil?
+
       GnuCash::Base.transaction do
-        Matview::OpcvmQuotationsFilledEur.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2007, 8, 31)).where.not(value_original: nil).each do |quotation|
+        Matview::OpcvmQuotationsFilled.where(opcvm_fund_id: fund.id).where('date >= ?', Date.new(2007, 8, 31)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
-          price.currency_guid = eur_currency.guid
+          price.currency_guid = currency.guid
           price.type = 'unknown'
           value = quotation.value_original.round(6).to_r
           price.value_num = value.numerator
@@ -39,12 +42,15 @@ module GnuCash
       commodity = fund.gnucash_commodity
       raise "Could not find commodity for fund #{fund.name}" if commodity.nil?
 
+      currency = GnuCash::Commodity.where(mnemonic: fund.currency).first
+      raise "Could not find currency for fund #{fund.name}" if currency.nil?
+
       GnuCash::Base.transaction do
-        Matview::ScpiQuotationsFilledEur.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).each do |quotation|
+        Matview::ScpiQuotationsFilled.where(scpi_fund_id: fund.id).where('date >= ?', Date.new(2013, 01, 01)).where.not(value_original: nil).each do |quotation|
           date = quotation.date.strftime('%Y%m%d170000')
           price = GnuCash::Price.where(commodity: commodity, date: date, source: 'user:price-editor').first_or_initialize
           price.guid = SecureRandom.hex(16) if price.guid.nil?
-          price.currency_guid = eur_currency.guid
+          price.currency_guid = currency.guid
           price.type = 'unknown'
           value = quotation.value_original.round(6).to_r
           price.value_num = value.numerator

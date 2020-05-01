@@ -48,6 +48,10 @@ class OpcvmFund < ActiveRecord::Base
     nil
   end
 
+  def original_quotation_at(date)
+    OpcvmQuotation.where(date: date, opcvm_fund_id: id).first.value
+  end
+
   def quotation_at(date)
     Matview::OpcvmQuotationsFilledEur.where(date: date, opcvm_fund_id: id).first.value
   end
