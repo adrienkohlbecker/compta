@@ -23,8 +23,6 @@ def refresh_quotations!
     end
   end
   private_quotations!
-  refresh_portfolio_xml_prices!("/dropbox/Portfolio Performance/portfolio.xml")
-  refresh_portfolio_xml_prices!("/dropbox/Portfolio Performance/portfolio-before-covid.xml")
 end
 
 def import_transactions!
