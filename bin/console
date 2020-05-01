@@ -4,4 +4,9 @@ set -euxo pipefail
 IFS=$'\n\t'
 
 docker build -t compta .
-docker run -ti --rm -v $(pwd):/app compta bundle exec rails console
+docker run -ti --rm \
+  -v $(pwd):/app \
+  -v $HOME/.pryrc:/root/.pryrc \
+  -v $HOME/.pry_history:/root/.pry_history \
+  compta \
+  bundle exec rails console

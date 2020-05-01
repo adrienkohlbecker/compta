@@ -1,4 +1,12 @@
-#!/usr/bin/env ruby
-require_relative '../config/boot'
-require 'rake'
-Rake.application.run
+#!/bin/bash
+# Unofficial bash strict mode http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euxo pipefail
+IFS=$'\n\t'
+
+docker build -t compta .
+docker run -ti --rm \
+  -v $(pwd):/app \
+  -v $HOME/.pryrc:/root/.pryrc \
+  -v $HOME/.pry_history:/root/.pry_history \
+  compta \
+  bundle exec rake $*
