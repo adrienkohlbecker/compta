@@ -1,0 +1,7 @@
+#!/bin/bash
+# Unofficial bash strict mode http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euxo pipefail
+IFS=$'\n\t'
+
+docker build -t compta .
+docker run -ti --rm -v $(pwd):/app compta bundle exec rails console
