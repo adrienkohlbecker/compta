@@ -6,7 +6,6 @@ require 'csv'
 require 'net/http'
 
 def reload!
-  load File.dirname(__FILE__) + '/gnu_cash.rb'
   load File.dirname(__FILE__) + '/gnu_cash/base.rb'
   load File.dirname(__FILE__) + '/gnu_cash/account.rb'
   load File.dirname(__FILE__) + '/gnu_cash/commodity.rb'
