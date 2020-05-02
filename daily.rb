@@ -2,4 +2,5 @@
 
 require_relative 'files.rb'
 
+refresh_prices
 export_situation
