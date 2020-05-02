@@ -1,11 +1,4 @@
-# Add your own tasks in files placed in lib/tasks ending in .rake,
-# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
-
-require_relative 'config/application'
-
-Rails.application.load_tasks
-
-task export_situation: :environment do
+def export_situation
   accounts = parse_tsv('/app/data/accounts.tsv').map {|i| GnuCash::Account.find_by_identifier(i[:account]) }
   situation = accounts.map { |account| account.value_tuples }.reduce(:+)
 

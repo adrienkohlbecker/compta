@@ -3,6 +3,8 @@
 set -euxo pipefail
 IFS=$'\n\t'
 
+PATH="/usr/local/bin:$PATH"
+
 docker build -t compta .
 docker run -ti --rm \
   -v $(pwd):/app \
@@ -10,4 +12,7 @@ docker run -ti --rm \
   -v $HOME/.pryrc:/root/.pryrc \
   -v $HOME/.pry_history:/root/.pry_history \
   compta \
-  bundle exec ruby console.rb
+  bundle exec ruby daily.rb
+
+echo "Notify Deadmansnitch..."
+curl "https://nosnch.in/2f07697414"
