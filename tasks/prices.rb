@@ -1,9 +1,9 @@
 # frozen_string_literal: true
-def refresh_prices
+def refresh_prices(cutoff = Date.new(2007,8,31))
   GnuCash::Base.connection.execute('CREATE INDEX IF NOT EXISTS compta_index_prices ON prices (date, commodity_guid, source)')
   GnuCash::Price.where.not(source: 'user:price-editor').delete_all
 
-  refresh_online_prices
+  refresh_online_prices(cutoff)
   refresh_manual_prices
 end
 
@@ -35,7 +35,7 @@ def parse_tsv(path)
   )
 end
 
-def refresh_online_prices
+def refresh_online_prices(cutoff = Date.new(2007,8,31))
   parse_tsv('/app/data/commodities.tsv').each do |item|
     commodity = find_commodity(item[:isin])
     currency = find_commodity(item[:currency])
@@ -46,7 +46,7 @@ def refresh_online_prices
         date = Date.strptime(quote["date"], "%Y-%m-%d")
         value = quote["close"]
 
-        next if date < Date.new(2007,8,31)
+        next if date < cutoff
 
         # precision
         # coingecko 10-7
@@ -62,16 +62,17 @@ def refresh_online_prices
 end
 
 def refresh_manual_prices
-  parse_tsv('/app/data/prices.tsv').each do |item|
-    commodity = find_commodity(item[:isin])
-    currency = find_commodity(item[:currency])
+  GnuCash::Base.transaction do
+    parse_tsv('/app/data/prices.tsv').each do |item|
+      commodity = find_commodity(item[:isin])
+      currency = find_commodity(item[:currency])
 
-    date = Date.strptime(item[:date], "%Y-%m-%d")
-    value = Rational(item[:price])
+      date = Date.strptime(item[:date], "%Y-%m-%d")
+      value = Rational(item[:price])
 
-    add_price(commodity, currency, date, value)
+      add_price(commodity, currency, date, value)
+    end
   end
-
 end
 
 def add_price(commodity, currency, date, value)

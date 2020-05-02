@@ -2,5 +2,5 @@
 
 require_relative 'files.rb'
 
-refresh_prices
+refresh_prices(Date.today - 1.year)
 export_situation
