@@ -73,6 +73,11 @@ def refresh_manual_prices
 end
 
 def add_price(commodity, currency, date, value)
+  if commodity.namespace == "CURRENCY"
+    # gnucash stores currencies in inverse (1 X = ? EUR)
+    value = 1/value
+  end
+
   price = GnuCash::Price.where(commodity_guid: commodity.guid, date: date.strftime('%Y%m%d170000'), source: 'user:price-editor').first_or_initialize
   price.guid = SecureRandom.hex(16) if price.guid.nil?
   price.currency_guid = currency.guid
