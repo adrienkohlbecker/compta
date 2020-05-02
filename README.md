@@ -1,4 +1,4 @@
 compta
 ======
 
-Crontab entry `32 17 * * * /Users/ak/Work/compta/bin/daily 2>&1 | tee -a /Users/ak/Work/compta/daily.log`
+Crontab entry `32 22 * * * cd $HOME/Work/compta && bin/daily > daily.log 2>&1`

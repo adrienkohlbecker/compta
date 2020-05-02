@@ -5,8 +5,11 @@ IFS=$'\n\t'
 
 PATH="/usr/local/bin:$PATH"
 
+echo "Building container..."
 docker build -t compta .
-docker run -ti --rm \
+
+echo "Running task..."
+docker run --rm \
   -v $(pwd):/app \
   -v $HOME/Dataroom/Compta:/dataroom \
   -v $HOME/.pryrc:/root/.pryrc \
