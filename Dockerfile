@@ -11,4 +11,4 @@ EXPOSE 3000
 
 ADD . /app
 
-CMD [ "bundle", "exec", "rails", "console"]
+CMD [ "bundle", "exec", "ruby", "console.rb" ]
