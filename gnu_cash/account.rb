@@ -81,7 +81,7 @@ module GnuCash
                 end
 
         isin = c.quote_source == 'currency' ? c.mnemonic : c.cusip
-        [identifier, c.fullname, isin, v.to_f.round(2), price.to_f.round(5), v * price.to_f.round(2)]
+        [identifier, c.fullname, isin, v.to_f.round(5), price.to_f.round(2), v * price.to_f.round(2)]
       end
     end
   end
