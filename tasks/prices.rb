@@ -4,7 +4,9 @@ def refresh_prices(cutoff = Date.new(2007, 8, 31))
   GnuCash::Base.connection.execute('CREATE INDEX IF NOT EXISTS compta_index_prices ON prices (date, commodity_guid, source)')
   GnuCash::Price.where.not(source: 'user:price-editor').delete_all
 
+  puts 'online quotes...'
   refresh_online_prices(cutoff)
+  puts 'manual quotes...'
   refresh_manual_prices
 end
 
@@ -34,6 +36,7 @@ end
 
 def refresh_online_prices(cutoff = Date.new(2007, 8, 31))
   parse_tsv('/app/data/commodities.tsv').each do |item|
+    puts item[:url]
     commodity = find_commodity(item[:isin])
     currency = find_commodity(item[:currency])
 

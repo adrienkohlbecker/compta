@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 source 'https://rubygems.org'
-ruby '2.5.7'
+ruby '2.5.9'
 
 gem 'activerecord', '~> 6.0.2', '>= 6.0.2.2'
 gem 'activesupport', '~> 6.0.2', '>= 6.0.2.2'

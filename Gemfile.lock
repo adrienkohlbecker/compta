@@ -24,7 +24,9 @@ GEM
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
     method_source (1.0.0)
-    mimemagic (0.3.4)
+    mimemagic (0.4.3)
+      nokogiri (~> 1)
+      rake
     mini_portile2 (2.4.0)
     minitest (5.14.0)
     nokogiri (1.10.9)
@@ -32,6 +34,7 @@ GEM
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
+    rake (13.0.3)
     rubyzip (2.3.0)
     sqlite3 (1.4.2)
     thread_safe (0.3.6)
@@ -51,7 +54,7 @@ DEPENDENCIES
   sqlite3 (~> 1.4)
 
 RUBY VERSION
-   ruby 2.5.7p206
+   ruby 2.5.9p229
 
 BUNDLED WITH
    1.17.3
