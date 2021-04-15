@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+$stdout.sync = true
+
 require_relative 'files.rb'
 
 puts 'Getting online prices for the last year...'
