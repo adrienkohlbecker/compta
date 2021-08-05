@@ -3,7 +3,12 @@
 set -euxo pipefail
 IFS=$'\n\t'
 
-PATH="/usr/local/bin:$PATH"
+PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+socat -u OPEN:/dev/null UNIX-CONNECT:/var/run/docker.sock || (
+  open /Applications/Docker.app
+  sleep 60
+)
 
 echo "Building container..."
 docker build -t compta .
@@ -16,6 +21,13 @@ docker run --rm \
   -v $HOME/.pry_history:/root/.pry_history \
   compta \
   bundle exec ruby daily.rb
+
+(
+  cd ../gitlab/compensation-calculator
+  git pull
+)
+
+killall Docker
 
 echo "Notify Deadmansnitch..."
 curl "https://nosnch.in/2f07697414"
