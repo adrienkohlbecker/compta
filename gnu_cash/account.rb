@@ -46,7 +46,15 @@ module GnuCash
 
     def value_tuples
       eur_funds = {}
-      splits = GnuCash::Split.where(account: deep_children + [self]).includes(account: :commodity)
+      splits = GnuCash::Split.where(account: deep_children + [self]).includes(account: :commodity, tx: {})
+      splits = splits.select do |s|
+        date = if s.tx.post_date.include?('-')
+                 Date.strptime(s.tx.post_date, '%Y-%m-%d %H:%M:%S')
+               else
+                 Date.strptime(s.tx.post_date, '%Y%m%d%H%M%S')
+               end
+        date <= Date.today
+      end
       commodities_and_values = splits.map do |s|
         commodity = if s.account.identifier.include?(':Fonds Euro:')
                       eur_funds[s.account.name] ||= GnuCash::Commodity.new(mnemonic: 'EUR', fullname: s.account.name, quote_source: 'currency')
