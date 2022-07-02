@@ -66,7 +66,7 @@ module GnuCash
 
       commodity_to_values = commodities_and_values.group_by { |item| item[0] }
       commodity_to_value = commodity_to_values.map { |commodity, tuples| [commodity, tuples.map { |tuple| tuple[1] }.reduce(:+)] }
-      nonzero_commodities = commodity_to_value.select { |tuple| tuple[1].abs > 0.1 }
+      nonzero_commodities = commodity_to_value.select { |tuple| (tuple[0].mnemonic == 'USD' && identifier == 'Cash:USD') || tuple[1].abs > 0.1 } # special case for Cash:USD to ensure we have the exchange rate in Excel
 
       eur_currency = GnuCash::Commodity.where(mnemonic: 'EUR').first
 

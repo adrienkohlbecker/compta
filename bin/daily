@@ -28,6 +28,3 @@ docker run --rm \
 )
 
 killall Docker
-
-echo "Notify Deadmansnitch..."
-curl "https://nosnch.in/2f07697414"
