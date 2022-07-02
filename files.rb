@@ -12,7 +12,8 @@ def reload!
   load File.dirname(__FILE__) + '/gnu_cash/price.rb'
   load File.dirname(__FILE__) + '/gnu_cash/split.rb'
   load File.dirname(__FILE__) + '/gnu_cash/transaction.rb'
-  load File.dirname(__FILE__) + '/tasks/situation.rb'
+  load File.dirname(__FILE__) + '/tasks/couple.rb'
   load File.dirname(__FILE__) + '/tasks/prices.rb'
+  load File.dirname(__FILE__) + '/tasks/situation.rb'
 end
 reload!
