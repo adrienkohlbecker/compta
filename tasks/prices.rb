@@ -40,9 +40,9 @@ def refresh_online_prices(cutoff = Date.new(2007, 8, 31))
     commodity = find_commodity(item[:isin])
     currency = find_commodity(item[:currency])
 
-    response = Net::HTTP.get(URI(item[:url]))
+    response = HTTParty.get(URI(item[:url]))
     GnuCash::Base.transaction do
-      JSON.parse(response).each do |quote|
+      JSON.parse(response.body).each do |quote|
         date = Date.strptime(quote['date'], '%Y-%m-%d')
         value = quote['close']
 

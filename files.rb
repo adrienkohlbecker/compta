@@ -3,7 +3,7 @@
 require 'active_record'
 require 'caxlsx'
 require 'csv'
-require 'net/http'
+require 'httparty'
 
 def reload!
   load File.dirname(__FILE__) + '/gnu_cash/base.rb'
@@ -13,6 +13,7 @@ def reload!
   load File.dirname(__FILE__) + '/gnu_cash/split.rb'
   load File.dirname(__FILE__) + '/gnu_cash/transaction.rb'
   load File.dirname(__FILE__) + '/tasks/couple.rb'
+  load File.dirname(__FILE__) + '/tasks/pension.rb'
   load File.dirname(__FILE__) + '/tasks/prices.rb'
   load File.dirname(__FILE__) + '/tasks/situation.rb'
 end
