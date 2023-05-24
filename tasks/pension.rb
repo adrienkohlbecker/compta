@@ -10,6 +10,7 @@ def get_pension(lookback = 30.days)
   while date > date_to_stop_at
     uri = URI('http://host.docker.internal:4567/asr')
     uri.query = "verification_token=#{verification_token}&date=#{date.strftime("%d-%m-%Y")}" if !verification_token.nil?
+    puts date
 
     begin
       response = JSON.parse(HTTParty.post(uri, body: {'cookies' => File.open('cookies.txt')}).body)
